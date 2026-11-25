@@ -1,0 +1,12 @@
+faker
+pyyaml
+pandas
+jinja2
+weasyprint
+pymupdf
+pillow
+opencv-python-headless
+python-docx
+pyodbc
+python-dotenv
+pytest
