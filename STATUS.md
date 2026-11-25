@@ -1,6 +1,6 @@
 # Project status: UC1 synthetic data
 
-*Last updated: 2026-11-25, after Stage 4. Updated at the end of every stage.*
+*Last updated: 2026-11-25, after Stage 5. Updated at the end of every stage.*
 
 ## 1. What this project is, in one paragraph
 
@@ -14,7 +14,7 @@ We are building a pretend environmental regulator ("the Authority") that receive
 | 2. Registry | The Authority's "database": applicants, sites, licences, past decisions, open cases. Also a plan for every application pack | **Done** (committed, `49cc2d4`) |
 | 3. Local database | Loads the registry into a real SQL Server running on this laptop | **Done** (committed) |
 | 4. Rules | The fake regulations (7 documents, 8 versions, 60 clauses) as Word, PDF and search-ready chunks, plus the settings tables (checklists, risk weights, thresholds) | **Done** (committed) |
-| 5. Precedents | 60 short write-ups of past decisions the AI can look up | Not started |
+| 5. Precedents | 60 short write-ups of past decisions the AI can look up, plus the answer key for precedent search | **Done** (committed) |
 | 6. Pack facts and answers | For each of the 105 application packs: the facts, and the correct verdict | Not started |
 | 7. Rendering | Turns the facts into PDF documents, some made to look like bad scans | Not started |
 | 8. Test sets | Question lists to test the AI: search questions, trick questions, attack attempts | Not started |
@@ -185,6 +185,46 @@ The database load now passes 21 of 21 checks, including the 4 settings tables.
 - **Risk score and tier.** Each risk factor adds points, for example a past refusal adds 3 and a rule not met adds 2. The total picks the tier: 0 is low, 1–2 is medium, 3 or more is high. High-tier cases must be approved by the section head.
 - **Secondary-language translations.** The spec wants RD-01, RD-04 and RD-07 in the second language as well. These are listed as pending in `seeds_manifest.json`.
 
+### Stage 5: Precedents (committed)
+
+**What was generated** (`make precedents`):
+- **`data/output/precedents/precedents.jsonl`** holds 60 summaries, one for each past decision marked for a precedent in Stage 2. Each is 150–183 words, built from templates and the decision's real facts:
+  - the activity, the district and the land use
+  - the distance to the nearest protected area, and whether that is inside or outside the buffer of the time
+  - the documents in the pack and the declared quantities against their limits
+  - why the decision went the way it did, the clauses relied on, and the outcome
+
+  Each record also has structured fields (permit type, outcome, date, key factors, site characteristics, clauses cited) and is marked **"context only, not a rule"**.
+- **`data/output/eval/precedents_gold.jsonl`** holds the answer key for the 20 gold packs: the 3 precedents a good search *should* return for each pack, and the ones it *must not* return.
+
+**Privacy.** The summaries contain **no applicant names, IDs or contact details**. The AI will read these, so they carry facts about the case, not about the person. A check scans every summary against all 300 applicant names.
+
+**How the answer key was built (assumption A-26).**
+- **First place** goes to the pack's designed **close match**.
+- **Places 2 and 3** go to the highest-scoring other precedents. Only precedents of the same permit type, decided *before* the pack's application date, are considered. The score adds:
+  - +4 for the same activity
+  - +3 for the same kind of reason (for example "too close to a protected area")
+  - +2 for the same distance band
+  - +2 for the main quantity within 25%
+  - +1 for the same land use
+- **Never in the top 3:** decoys, and the pack's own "distant" match.
+
+**What the four kinds of precedent look like in practice:**
+- **Close:** same permit type, same activity, same distance band, quantities within 15%, decided before the pack.
+- **Distant:** same permit type, but a different activity and a very different scale.
+- **Decoy:** the *other* permit type, but its wording names the pack's activity. For example, "an aggregate crushing site **next to a plant nursery irrigation well**" is a decoy for a well pack. A search that only matches words gets fooled.
+- **Generic:** ordinary background.
+
+**Superseded rule in precedents.** 5 precedents cite the old RD-01 v1. Two of them (PREC-0032 and PREC-0073) are in a gold top 3. That is intended: the AI *should* show them as context, but must cite the current rule in its findings.
+
+**How it was verified.** `check_precedents.py` runs 24 of 24 checks, all passing. It confirms:
+- every summary matches its registry decision (permit type, outcome, date, clauses)
+- every cited clause exists in the rule corpus
+- the close, distant and decoy precedents really have the properties above
+- every gold top 3 is valid
+- no personal data appears
+- two builds are byte-identical
+
 ## 5. Decisions made (and why)
 
 | Date | Decision | Why |
@@ -200,6 +240,8 @@ The database load now passes 21 of 21 checks, including the 4 settings tables.
 | 2026-11-25 | Clauses are cited as `RD-01 Art.6 v2` (with version); `clause_id` stays version-free | Matches the database, which stores clause ID and version separately, and the label example in the spec |
 | 2026-11-25 | Risk weights: refusal 3, open enforcement 3, inside buffer 2, a rule not met 2, two or more unclear 1, PT-2 pumping above 40,000 m³/yr 1, low-confidence fields 1. Tiers: low 0, medium 1–2, high 3 or more | Turns assumption A-16 into numbers. It gives the spec's expected tiers: clean packs low or medium, and packs from applicants with a past refusal or open enforcement high |
 | 2026-11-25 | A few extra concrete rules were added so every clause can be tested (for example, a pumping test is needed above 20,000 m³/yr, and casing must be grouted to 6 m) | The spec asks for one testable requirement per clause. Stage 6 must make the packs follow them |
+| 2026-11-25 | Precedent summaries leave out applicant names and contact details | The AI reads precedents, and it only needs the facts of the case |
+| 2026-11-25 | The precedent search answer key uses a fixed, written-down scoring rule (close match first, then scored by activity, reason, distance band, quantity and land use) | Makes A-26 ("relevance judged by me") repeatable and checkable instead of hand-picked |
 
 ## 6. Open questions for you
 1. **Nationalities are real-world labels** (for example "Indian" or "British"), but every name comes from a US name list. The fairness test therefore mostly checks name bias, and only weakly. We could keep this, or use name lists from several countries.
@@ -233,10 +275,11 @@ cd ~/Desktop/Upskilling/agentic-ai-techm
 ```bash
 make registry     # registry CSVs + pack plan into data/output/
 make rules        # rule documents (Word, PDF), chunks.jsonl, config_seed.sql
-make check        # all checks: registry "97/97 passed", rules "48/48 passed"
+make precedents   # 60 precedent summaries + the gold top-3 answer key
+make check        # all checks: precedents 24/24, registry 97/97, rules 48/48
 make test         # run the unit tests
 ```
-Run `make registry` before `make rules`. The rules checker also confirms every clause the past decisions cite.
+Run them in this order: `registry`, then `rules`, then `precedents`. Each one reads the output of the one before.
 To read the rules, open the PDFs in `data/output/rules/pdf/` (for example `RD-01_v1.pdf` and `RD-01_v2.pdf` side by side).
 Generated files go to `data/output/`. They are not stored in git, because these commands can always rebuild them, byte for byte.
 
