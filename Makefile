@@ -41,8 +41,10 @@ check:  ## Run every data check that exists
 db-up:  ## Start local SQL Server 2022 (docker)
 	docker compose up -d
 
+# msodbcsql18 loads OpenSSL from brew's default "openssl" (now 4.x, unsupported);
+# point it at openssl@3 for this target only.
 db-load:  ## Apply schema.sql and load registry CSVs
-	$(PY) data/loaders/load_sql_local.py
+	DYLD_LIBRARY_PATH=$(shell brew --prefix openssl@3 2>/dev/null)/lib $(PY) data/loaders/load_sql_local.py
 
 db-down:  ## Stop local SQL Server
 	docker compose down

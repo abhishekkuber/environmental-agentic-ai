@@ -1,6 +1,6 @@
 # Project status: UC1 synthetic data
 
-*Last updated: 2026-11-25, after Stage 2. Updated at the end of every stage.*
+*Last updated: 2026-11-25, after Stage 3. Updated at the end of every stage.*
 
 ## 1. What this project is, in one paragraph
 
@@ -11,8 +11,8 @@ We are building a pretend environmental regulator ("the Authority") that receive
 | Stage | What it produces | Status |
 |---|---|---|
 | 1. Skeleton | Folders, settings file, build commands, shared helper code | **Done** (committed) |
-| 2. Registry | The Authority's "database": applicants, sites, licences, past decisions, open cases. Also a plan for every application pack | **Done, waiting for your review** (not committed yet) |
-| 3. Local database | Loads the registry into a real SQL Server running on this laptop | Not started. Needs two Homebrew installs first (see §7) |
+| 2. Registry | The Authority's "database": applicants, sites, licences, past decisions, open cases. Also a plan for every application pack | **Done** (committed, `49cc2d4`) |
+| 3. Local database | Loads the registry into a real SQL Server running on this laptop | **Done** (committed) |
 | 4. Rules | The fake regulations (7 documents, about 52 clauses) as Word, PDF and search-ready chunks | Not started |
 | 5. Precedents | 60 short write-ups of past decisions the AI can look up | Not started |
 | 6. Pack facts and answers | For each of the 105 application packs: the facts, and the correct verdict | Not started |
@@ -83,7 +83,7 @@ We are building a pretend environmental regulator ("the Authority") that receive
 - Folder layout, `config.yaml` (every count and setting in one place), `Makefile` (run `make help` to list commands), the Docker setup for SQL Server, and pinned Python packages.
 - `common.py` holds the shared helpers: random numbers per stage, fake names, distance maths, ID formats, and file writing.
 
-### Stage 2: Registry and pack plan (done, not committed)
+### Stage 2: Registry and pack plan (committed, `49cc2d4`)
 
 **What was generated** (in `data/output/registry/`, as CSV files whose columns match the database exactly):
 
@@ -112,6 +112,26 @@ We are building a pretend environmental regulator ("the Authority") that receive
 
 **How it was verified.** An independent checker (`check_registry.py`) re-reads the CSVs and recomputes everything: counts, links between tables, distances from the coordinates, licence dates against pack dates, and the database column rules. **97 of 97 checks pass.** Three separate builds produced identical files.
 
+### Stage 3: Local database (committed)
+
+**What it does.** `make db-up` starts SQL Server 2022 in Docker. `make db-load` then does four things:
+1. Wipes and recreates a database called `uc1`, so it is safe to run again.
+2. Applies `docs/schema.sql` exactly as written. The file itself is not modified.
+3. Loads the six registry CSVs.
+4. Checks the result.
+
+**What was checked (17 of 17 pass):**
+- Row counts in the database equal the CSV row counts for all six tables.
+- All 4 read-only **views** return rows, and their counts agree with the planted data: 30 applicants with a refusal, 12 with open enforcement.
+- **Data masking works.** A database user without the "UNMASK" permission sees `rXXX@XXXX.com` for an email, `XXXX8769` for an ID number and `xxxx` for a phone number. The administrator sees the real (fake) values.
+- Special characters (for example "m³") and the 6-decimal coordinates survive the load unchanged.
+
+**New words:**
+- **View.** A saved query that shows only some columns of a table. The AI will read the registry only through views. For example, `v_applicant_history` shows refusal and enforcement counts but never the nationality or ID number.
+- **Data masking.** SQL Server hides sensitive columns (email, ID number, phone) from anyone without the UNMASK permission. No AI identity will ever be given UNMASK.
+
+**Setup problem we hit (fixed).** Microsoft's database driver looks for OpenSSL version 3 or older, but Homebrew now installs version 4 as its default. The `make db-load` command now points the driver at OpenSSL 3, which you already have, and this applies to that command only. Nothing on the laptop was changed.
+
 ## 5. Decisions made (and why)
 
 | Date | Decision | Why |
@@ -125,14 +145,19 @@ We are building a pretend environmental regulator ("the Authority") that receive
 | 2026-11-25 | Two clean packs (`P1-004`, `P2-020`) sit 500–700 m from a protected area | Checks that the AI doesn't flag a site that is close but legal |
 
 ## 6. Open questions for you
-1. **Approve the Stage 2 commit?** The proposed message is in the chat.
-2. **Nationalities are real-world labels** (for example "Indian" or "British"), but every name comes from a US name list. The fairness test therefore mostly checks name bias, and only weakly. We could keep this, or use name lists from several countries.
-3. **Scenarios A6 and A7** are mentioned but never defined in the documents. Nothing is tagged with them yet.
+1. **Nationalities are real-world labels** (for example "Indian" or "British"), but every name comes from a US name list. The fairness test therefore mostly checks name bias, and only weakly. We could keep this, or use name lists from several countries.
+2. **Scenarios A6 and A7** are mentioned but never defined in the documents. Nothing is tagged with them yet.
 
-## 7. Before Stage 3
-To talk to SQL Server from Python, the laptop needs: `brew install unixodbc`, plus Microsoft's ODBC Driver 18 (`brew tap microsoft/mssql-release && brew install msodbcsql18`). Docker Desktop also needs "Use Rosetta" switched on, because the SQL Server image is built for Intel chips.
+## 7. Machine setup (done)
+These are already done on this laptop:
+- `brew install unixodbc`, plus Microsoft's ODBC Driver 18 (`brew tap microsoft/mssql-release && brew install msodbcsql18`).
+- "Use Rosetta" switched on in Docker Desktop, because the SQL Server image is built for Intel chips.
+- `.env` created with a random database password. It is not stored in git.
+
+On a fresh machine, repeat these steps first.
 
 ## 8. How to run things
 - `make help` lists every command.
 - `make registry` rebuilds the registry and the pack plan. `make check` runs every check. `make test` runs the unit tests.
+- `make db-up` starts the database. `make db-load` loads the registry and checks it. `make db-down` stops the database; the data is kept in a Docker volume.
 - Generated files go to `data/output/`. They are not stored in git, because they can always be rebuilt.
