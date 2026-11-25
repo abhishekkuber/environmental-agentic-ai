@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+{% import 'sections.html' as s %}
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>{{ title }}</title>
+<meta name="description" content="{{ footer }}">
+<meta name="keywords" content="{{ keywords }}">
+<meta name="dcterms.created" content="{{ build_date }}">
+<meta name="dcterms.modified" content="{{ build_date }}">
+<meta name="generator" content="UC1 synthetic data">
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 18mm 22mm 18mm;
+    font-family: "Helvetica", "Arial", sans-serif;
+    @top-left { content: "{{ header_left }}"; font-size: 8pt; color: #555; }
+    @top-right { content: "Ref. {{ reference }}"; font-size: 8pt; color: #555; }
+    @bottom-left { content: "{{ footer }}"; font-size: 8pt; color: #555; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #555; }
+  }
+  body { font-family: "Helvetica", "Arial", sans-serif; font-size: 10pt; line-height: 1.4; color: #111; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  h1 { font-size: 15pt; margin: 0 0 1mm 0; }
+  h2 { font-size: 11pt; margin: 5mm 0 2mm 0; border-bottom: 1px solid #999; padding-bottom: 1mm; }
+  .sub { font-size: 9pt; color: #444; margin-bottom: 4mm; }
+  table.kv { border-collapse: collapse; width: 100%; margin-bottom: 3mm; }
+  table.kv td { border: 1px solid #bbb; padding: 1.4mm 2mm; vertical-align: top; }
+  table.kv td.k { width: 38%; background: #f2f2f2; }
+  table.grid { border-collapse: collapse; width: 100%; margin-bottom: 3mm; }
+  table.grid th, table.grid td { border: 1px solid #bbb; padding: 1.2mm 2mm; text-align: left; }
+  table.grid th { background: #e8e8e8; }
+  .sig { border: 1.2px solid #333; height: 34mm; width: 95mm; margin-top: 3mm; position: relative; }
+  .sig img { height: 30mm; margin: 2mm; }
+  .sig .who { position: absolute; bottom: 1.5mm; left: 3mm; font-size: 8.5pt; }
+  .note { border: 1px solid #888; background: #fafafa; padding: 2mm 3mm; margin: 3mm 0; }
+  .hidden { color: #ffffff; font-size: 2pt; }
+  .small { font-size: 8.5pt; color: #444; }
+</style>
+</head>
+<body>
+{% for page in pages %}
+  <div class="page">
+  {% if loop.first %}
+    <h1>{{ title }}</h1>
+    <div class="sub">{{ subtitle }}</div>
+  {% endif %}
+  {% for key in page.sections %}{{ s[key](page.fields or f, ctx) }}{% endfor %}
+  {% if page.injection %}
+    {% if page.injection.style == 'white_2pt' %}<p class="hidden">{{ page.injection.text }}</p>
+    {% else %}<div class="note">{{ page.injection.text }}</div>{% endif %}
+  {% endif %}
+  </div>
+{% endfor %}
+</body>
+</html>

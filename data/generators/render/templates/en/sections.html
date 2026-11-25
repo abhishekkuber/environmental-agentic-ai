@@ -1,0 +1,197 @@
+{# English wording for every document section. f = document fields, ctx = pack context.
+   Exercise content: fictional data. Document codes (C1, P2-2 ...) are never printed. #}
+
+{% macro kv(rows) %}<table class="kv">{% for k, v in rows %}<tr><td class="k">{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}</table>{% endmacro %}
+
+{# ------------------------------------------------------------ application form #}
+{% macro C1_details(f, ctx) %}
+<h2>1. Applicant</h2>
+{{ kv([("Applicant name", f.applicant_name), ("Applicant number", f.applicant_id),
+       ("Applicant type", "Operating company" if f.applicant_type == "company" else "Consultant acting for the operator"),
+       ("Contact email", ctx.contact_email), ("Permit applied for", ctx.permit_name),
+       ("Trade licence number", f.licence_number), ("Submission date", f.submission_date)]) }}
+{% endmacro %}
+
+{% macro C1_site(f, ctx) %}
+<h2>2. Site and activity</h2>
+{{ kv([("Site address", f.site_address), ("Plot number", f.plot_id),
+       ("Latitude", ctx.fmt_coord(f.site_lat)), ("Longitude", ctx.fmt_coord(f.site_lon)),
+       ("Activity", f.activity_description)]) }}
+<h2>3. Declared quantities</h2>
+<table class="grid"><tr><th>Quantity</th><th>Value</th><th>Unit</th></tr>
+{% if ctx.permit_type == "PT-1" %}
+<tr><td>Annual PM10 emissions</td><td>{{ f.declared.pm10_t_per_year }}</td><td>t/yr</td></tr>
+<tr><td>Annual waste generated</td><td>{{ ctx.fmt_int(f.declared.waste_t_per_year) }}</td><td>t/yr</td></tr>
+<tr><td>Maximum on-site waste storage</td><td>{{ f.declared.waste_storage_days }}</td><td>days</td></tr>
+{% else %}
+<tr><td>Planned annual abstraction</td><td>{{ ctx.fmt_int(f.declared.abstraction_m3_per_year) }}</td><td>m³/yr</td></tr>
+{% endif %}
+</table>
+{% endmacro %}
+
+{% macro C1_declaration(f, ctx) %}
+<h2>4. Declaration</h2>
+<p>I declare that the information in this application and its attachments is complete and correct, and
+that the activity will be carried out as described. I understand that the Authority may request further
+information before deciding the application.</p>
+<p class="small">Attachments listed by the applicant: site plan, trade licence copy, ownership evidence and the
+technical documents required for this permit type.</p>
+<div class="sig">{% if f.signature_present %}<img src="{{ ctx.signature_img }}" alt="signature">{% endif %}
+<div class="who">Signed by: {{ f.signatory }}{% if f.signature_present %} &nbsp; Date: {{ f.submission_date }}{% endif %}</div></div>
+{% endmacro %}
+
+{# ------------------------------------------------------------ site plan #}
+{% macro C2_plan(f, ctx) %}
+<h2>Site location</h2>
+{{ kv([("Plot number", f.plot_id), ("District", f.district), ("Latitude", ctx.fmt_coord(f.site_lat)),
+       ("Longitude", ctx.fmt_coord(f.site_lon)), ("Scale", f.scale), ("Drawing date", f.drawing_date)]) }}
+<svg width="160mm" height="95mm" viewBox="0 0 160 95" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0.5" y="0.5" width="159" height="94" fill="none" stroke="#999" stroke-width="0.4"/>
+  <rect x="45" y="22" width="60" height="42" fill="#eef4ee" stroke="#222" stroke-width="0.8"/>
+  <text x="75" y="45" font-size="5" text-anchor="middle">{{ f.plot_id }}</text>
+  <circle cx="75" cy="52" r="1.6" fill="#b00020"/>
+  <text x="79" y="56" font-size="3.2">site point</text>
+  <path d="M145 12 L149 22 L145 19 L141 22 Z" fill="#222"/><text x="145" y="9" font-size="4" text-anchor="middle">N</text>
+  <line x1="10" y1="85" x2="50" y2="85" stroke="#222" stroke-width="0.8"/>
+  <text x="30" y="82" font-size="3.2" text-anchor="middle">scale {{ f.scale }}</text>
+  <path d="M0 70 C40 66 120 76 160 70" fill="none" stroke="#aaa" stroke-width="2.5"/>
+  <text x="120" y="80" font-size="3" fill="#666">access road</text>
+</svg>
+{% endmacro %}
+
+{% macro C2_notes(f, ctx) %}
+<h2>Notes</h2>
+<p>The site point marks the location used for the application. Coordinates are in decimal degrees. The plot
+outline is schematic and not a survey of boundaries.</p>
+{{ kv([("Prepared for", ctx.applicant_name), ("Reference", ctx.reference)]) }}
+{% endmacro %}
+
+{# ------------------------------------------------------------ trade licence #}
+{% macro C3_certificate(f, ctx) %}
+<h2>Trade licence</h2>
+<p>This certifies that the holder named below is licensed to carry out the activity stated.</p>
+{{ kv([("Licence number", f.licence_number), ("Holder name", f.holder_name), ("Licensed activity", f.activity),
+       ("Issue date", f.issue_date), ("Expiry date", f.expiry_date)]) }}
+<p class="small">Issued by the licensing office (fictional). This copy was supplied by the applicant.</p>
+{% endmacro %}
+
+{# ------------------------------------------------------------ ownership evidence #}
+{% macro C4_deed(f, ctx) %}
+<h2>{{ "Title deed" if f.document_type == "title deed" else "Registered lease" }}</h2>
+{{ kv([("Owner" if f.document_type == "title deed" else "Leaseholder", f.owner_name), ("Plot number", f.plot_id),
+       ("Document date", f.document_date)]) }}
+<p>The plot described above is registered in the name of the party stated.</p>
+{% endmacro %}
+
+{% macro C4_schedule(f, ctx) %}
+{% if f.authorisation_present %}
+<h2>Owner's authorisation</h2>
+<p>I, on behalf of {{ f.owner_name }}, authorise {{ f.authorised_party }} to apply to the Authority for a permit
+for plot {{ f.plot_id }} and to act for us in that application.</p>
+{{ kv([("Authorised party", f.authorised_party), ("Date", f.document_date)]) }}
+{% else %}
+<h2>Schedule</h2>
+<p>No other party holds a registered interest in the plot. The owner is the applicant.</p>
+{% endif %}
+{% endmacro %}
+
+{# ------------------------------------------------------------ emissions and waste summary #}
+{% macro P11_summary(f, ctx) %}
+<h2>1. Emissions to air</h2>
+{{ kv([("Pollutants assessed", f.pollutants | join(", ")), ("Annual PM10 emissions", f.pm10_t_per_year ~ " t/yr"),
+       ("Continuous monitoring proposed", "Yes" if f.monitoring_proposed else "No")]) }}
+{% endmacro %}
+
+{% macro P11_waste(f, ctx) %}
+<h2>2. Waste</h2>
+<table class="grid"><tr><th>Item</th><th>Value</th></tr>
+<tr><td>Annual waste generated</td><td>{{ ctx.fmt_int(f.waste_t_per_year) }} t/yr</td></tr>
+<tr><td>Maximum on-site storage</td><td>{{ f.waste_storage_days }} days</td></tr>
+<tr><td>Main waste types</td><td>{{ f.waste_types | join(", ") }}</td></tr>
+<tr><td>Liquid waste stored</td><td>{{ "Yes" if f.liquid_waste else "No" }}</td></tr></table>
+{% endmacro %}
+
+{% macro P11_controls(f, ctx) %}
+<h2>3. Control measures</h2>
+<ul>{% for c in f.control_measures %}<li>{{ c }}</li>{% endfor %}</ul>
+{% if f.liquid_waste %}<p>Liquid waste containment: {{ f.containment_description }}.</p>{% endif %}
+{% endmacro %}
+
+{% macro P11_notes(f, ctx) %}
+<h2>4. Basis of the figures</h2>
+<p>Figures are annual estimates for normal operation, based on design throughput and supplier data.
+They are consistent with the quantities declared in the application form.</p>
+{% endmacro %}
+
+{# ------------------------------------------------------------ well design #}
+{% macro P21_design(f, ctx) %}
+<h2>1. Well design</h2>
+{{ kv([("Well depth", f.well_depth_m ~ " m"), ("Borehole diameter", f.diameter_mm ~ " mm"), ("Casing", f.casing),
+       ("Planned annual abstraction", ctx.fmt_int(f.abstraction_m3_per_year) ~ " m³/yr"),
+       ("Well latitude", ctx.fmt_coord(f.well_lat)), ("Well longitude", ctx.fmt_coord(f.well_lon))]) }}
+{% endmacro %}
+
+{% macro P21_construction(f, ctx) %}
+<h2>2. Construction</h2>
+{{ kv([("Casing grouted from surface to", f.grout_depth_m ~ " m below ground"),
+       ("Drilling contractor registration", f.driller_registration),
+       ("Calibrated flow meter", "Fitted before abstraction" if f.flow_meter else "Not fitted")]) }}
+{% endmacro %}
+
+{% macro P21_section(f, ctx) %}
+<h2>3. Schematic section</h2>
+<svg width="70mm" height="110mm" viewBox="0 0 70 110" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="8" x2="70" y2="8" stroke="#555" stroke-width="0.6"/><text x="2" y="6" font-size="3">ground level</text>
+  <rect x="30" y="8" width="10" height="95" fill="#f4f4f4" stroke="#222" stroke-width="0.6"/>
+  <rect x="27" y="8" width="3" height="18" fill="#bbb"/><rect x="40" y="8" width="3" height="18" fill="#bbb"/>
+  <text x="45" y="20" font-size="3">grout {{ f.grout_depth_m }} m</text>
+  <text x="45" y="100" font-size="3">depth {{ f.well_depth_m }} m</text>
+</svg>
+{% endmacro %}
+
+{# ------------------------------------------------------------ hydrogeological survey #}
+{% macro P22_summary(f, ctx) %}
+<h2>1. Summary</h2>
+{{ kv([("Date of fieldwork", f.survey_date), ("Target aquifer", f.aquifer),
+       ("Static water level", f.static_water_level_m ~ " m below ground"), ("Site", ctx.site_address)]) }}
+{% endmacro %}
+
+{% macro P22_aquifer(f, ctx) %}
+<h2>2. Aquifer</h2>
+<p>The {{ f.aquifer }} was identified at the proposed well location. The static water level was measured at
+{{ f.static_water_level_m }} m below ground on the date of fieldwork.</p>
+{% endmacro %}
+
+{% macro P22_quality(f, ctx) %}
+<h2>3. Water quality</h2>
+<table class="grid"><tr><th>Parameter</th><th>Result</th></tr>
+<tr><td>Total dissolved solids</td><td>{{ ctx.fmt_int(f.tds_mg_l) }} mg/L</td></tr>
+<tr><td>Classification</td><td>{{ "Fresh to slightly brackish" if f.tds_mg_l < 3000 else "Brackish" }}</td></tr></table>
+{% endmacro %}
+
+{% macro P22_pumping(f, ctx) %}
+<h2>4. Pumping test</h2>
+{% if f.pumping_test_hours %}<p>A constant-rate pumping test lasting {{ f.pumping_test_hours }} hours was carried out.</p>
+{% else %}<p>No pumping test was required for the planned abstraction.</p>{% endif %}
+{% endmacro %}
+
+{% macro P22_method(f, ctx) %}
+<h2>5. Method</h2>
+<p>Water levels were measured with a calibrated dip meter. Samples were collected after purging and analysed by a
+laboratory registered with the Authority (fictional).</p>
+{% endmacro %}
+
+{% macro P22_signoff(f, ctx) %}
+<h2>6. Sign-off</h2>
+{{ kv([("Surveyor", f.surveyor), ("Registration", f.surveyor_registration), ("Report date", f.survey_date)]) }}
+<div class="sig">{% if f.signed %}<img src="{{ ctx.signature_img }}" alt="signature">{% endif %}
+<div class="who">Signed by: {{ f.surveyor }}</div></div>
+{% endmacro %}
+
+{# ------------------------------------------------------------ performance annex #}
+{% macro annex(f, ctx) %}
+<h2>Annex {{ f.no }}: supporting records</h2>
+<table class="grid"><tr><th>Month</th><th>Reading</th><th>Remark</th></tr>
+{% for m, v in f.rows %}<tr><td>Month {{ m }}</td><td>{{ v }}</td><td>routine record</td></tr>{% endfor %}
+</table>
+{% endmacro %}
