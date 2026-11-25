@@ -1,6 +1,6 @@
 # Project status: UC1 synthetic data
 
-*Last updated: 2026-11-25, after Stage 5. Updated at the end of every stage.*
+*Last updated: 2026-11-25, after Stage 6. Updated at the end of every stage.*
 
 ## 1. What this project is, in one paragraph
 
@@ -15,12 +15,110 @@ We are building a pretend environmental regulator ("the Authority") that receive
 | 3. Local database | Loads the registry into a real SQL Server running on this laptop | **Done** (committed) |
 | 4. Rules | The fake regulations (7 documents, 8 versions, 60 clauses) as Word, PDF and search-ready chunks, plus the settings tables (checklists, risk weights, thresholds) | **Done** (committed) |
 | 5. Precedents | 60 short write-ups of past decisions the AI can look up, plus the answer key for precedent search | **Done** (committed) |
-| 6. Pack facts and answers | For each of the 105 application packs: the facts, and the correct verdict | Not started |
+| 6. Pack facts and answers | For each of the 105 application packs: the facts, and the correct verdict | **Done** (committed) |
 | 7. Rendering | Turns the facts into PDF documents, some made to look like bad scans | Not started |
 | 8. Test sets | Question lists to test the AI: search questions, trick questions, attack attempts | Not started |
 | 9. Final check and README | One command checks everything; README explains how to rebuild | Not started |
 
 ## 3. Words used in this project
+
+### Acronyms and codes at a glance
+
+**Project and permits**
+
+| Short form | Stands for | Meaning here |
+|---|---|---|
+| UC1 | Use Case 1 | This assessment's first use case: permit and NOC processing |
+| NOC | No-Objection Certificate | The Authority's permission for an industrial or development activity |
+| PT-1 | Permit Type 1 | Environmental NOC (Air and Industrial department) |
+| PT-2 | Permit Type 2 | Groundwater well permit (Groundwater department) |
+| RFI | Request for Information | Letter asking the applicant for missing or corrected documents |
+| AI | Artificial Intelligence | The assistant that will later check applications |
+
+**Rules**
+
+| Short form | Stands for | Meaning here |
+|---|---|---|
+| RD-01 … RD-07 | Rule Document 1 … 7 | The seven fake regulations (titles in §4, Stage 4) |
+| Art. | Article | A numbered rule inside a regulation, as in `RD-01 Art.6` |
+| v1 / v2 | Version 1 / 2 | Old and new versions of RD-01; v2 applies from 2026-07-01 |
+
+**Documents in a pack**
+
+| Code | Document |
+|---|---|
+| C1 | Application form |
+| C2 | Site plan |
+| C3 | Trade licence copy |
+| C4 | Ownership evidence |
+| P1-1 | Emissions or waste summary (PT-1 only) |
+| P2-1 | Well design (PT-2 only) |
+| P2-2 | Hydrogeological survey (PT-2 only) |
+
+**Pack IDs**
+
+| Prefix | Meaning |
+|---|---|
+| P1-xxx / P2-xxx | Core packs of permit type 1 / 2 (001–020 complete, 021–030 seeded) |
+| FV-xxx | Fairness Variant |
+| RS-xxx | ReSubmission |
+| RT-xx | Red Team (attack test) pack. The number matches the attack case R-xx |
+| PF-xxx | PerFormance pack (30 pages) |
+
+**Test scenarios and requirement IDs (from the brief and spec)**
+
+| Short form | Meaning |
+|---|---|
+| A1 … A8 | Acceptance scenarios: A1 clean pack, A2 incomplete pack (expired licence + missing survey), A3 rule-version change, A4 hostile instructions in a document, A5 no rule covers it, A8 a service fails. A6 and A7 are not defined in our documents yet |
+| R-01 … R-21 | Red-team (attack) test cases from the security pack |
+| A-01 … A-28 | Assumptions in `docs/UC1 Assumption Log.md` |
+| FR-x.y / BR-x.y / NFR | Functional / Business / Non-Functional Requirement numbers from the brief |
+
+**Registry record IDs (all invented formats)**
+
+| Prefix | Record |
+|---|---|
+| APP- | Applicant |
+| SITE- | Site |
+| PLT- | Plot (land parcel) number |
+| PA- | Protected Area |
+| LIC- | Licence record |
+| TL- | Trade Licence number |
+| EP- | Environmental Permit number |
+| WP- | Well Permit number |
+| NID- | National ID (people) |
+| CR- | Company Registration (companies) |
+| DEC- | Past decision |
+| PREC- | Precedent summary |
+| OC- | Open Case |
+| UC1-… | Case ID |
+| SUB-… | Submission ID |
+| DR- | Driller registration |
+| HG- | Hydrogeologist registration |
+
+**Measures**
+
+| Short form | Meaning |
+|---|---|
+| PM10 | Dust particles of 10 micrometres or smaller (an air pollutant) |
+| t/yr | Tonnes per year |
+| m³/yr | Cubic metres per year (water pumped) |
+| TDS | Total Dissolved Solids (water quality, in mg/L) |
+
+**Tech**
+
+| Short form | Stands for | Meaning here |
+|---|---|---|
+| SQL | Structured Query Language | Language and database (SQL Server) holding the registry |
+| ODBC | Open Database Connectivity | The driver Python uses to talk to SQL Server |
+| UNMASK | (SQL Server permission) | Lets a user see hidden values such as emails; no AI gets it |
+| PK / FK | Primary Key / Foreign Key | A record's unique ID / a link to another table's record |
+| CSV | Comma-Separated Values | Spreadsheet-like text files for the registry tables |
+| JSON / JSONL | JavaScript Object Notation (Lines) | Structured text files; JSONL has one record per line |
+| YAML | YAML Ain't Markup Language | Human-friendly settings and rule files (`config.yaml`, `rules_src/`) |
+| DOCX / PDF | Word document / Portable Document Format | The rendered documents |
+| OCR | Optical Character Recognition | Reading text from scanned images |
+| PII | Personally Identifiable Information | Names, IDs and contact details, kept out of what the AI sees |
 
 ### The basics
 - **Permit types.** There are two kinds of application:
@@ -110,7 +208,7 @@ We are building a pretend environmental regulator ("the Authority") that receive
 - **Expired licence and missing survey (scenario A2):** `P2-023`.
 - **Hostile instruction in the PDF (scenario A4):** `P1-028`.
 
-**How it was verified.** An independent checker (`check_registry.py`) re-reads the CSVs and recomputes everything: counts, links between tables, distances from the coordinates, licence dates against pack dates, and the database column rules. **97 of 97 checks pass.** Three separate builds produced identical files.
+**How it was verified.** An independent checker (`check_registry.py`) re-reads the CSVs and recomputes everything: counts, links between tables, distances from the coordinates, licence dates against pack dates, and the database column rules. **97 of 97 checks pass** (99 since Stage 6 added the coastal-site checks). Three separate builds produced identical files.
 
 ### Stage 3: Local database (committed)
 
@@ -225,6 +323,58 @@ The database load now passes 21 of 21 checks, including the 4 settings tables.
 - no personal data appears
 - two builds are byte-identical
 
+### Stage 6: Pack facts and correct answers (committed)
+
+**What was generated** (`make packs`) for all 105 packs:
+- **`data/output/packs/{pack}/facts.json`** holds everything that will be printed on the pack's documents:
+  - the applicant, the site, and the fields of each document (form, site plan, licence copy, ownership proof, emissions summary or well design and survey)
+  - how each document will be drawn: digital or scanned, number of pages, and any hidden attack text
+  - what the portal would send: file names and declared types
+
+  Stage 7 only draws these facts and decides nothing itself.
+- **`data/output/labels/{pack}.json`** holds the **correct answer** for the pack:
+  - each required document marked present, missing or invalid, with the reason
+  - complete or incomplete, and the items a request for information must list
+  - every rule finding, each with the exact clause version in force on the application date and the "trap" version that must *not* be cited
+  - conditions, notes for the officer, risk score, tier and approver, the recommended outcome, and whether attack text should be flagged
+
+**How the answers are produced.** A separate rules engine (`labeller.py`) reads the final facts and applies the checklist and the clauses in force on the application date. Planted defects are made in the facts *before* the answers are computed, so the documents and the answers can't disagree.
+
+**Two new planted cases (you chose these):**
+- **Coastal survey conflict.** Two PT-2 packs sit on coastal sites, each with a 15-month-old survey:
+  - **P2-006** is dated before the cutover. It **passes**, because only the 24-month rule applied then. The 12-month coastal rule is recorded as the trap.
+  - **P2-004** is dated after the cutover. Its survey **fails** under RD-01 Art. 9 v2 (12 months), and the label notes the conflict with RD-05 Art. 2 (24 months).
+- **Vague containment rule.** The two PT-1 packs from applicants with a past refusal or open enforcement (**P1-001**, **P1-014**) store liquid waste. Their containment finding is **unclear** (RD-03 Art. 5).
+
+**What the answers look like by group** (they match the spec):
+
+| Group | Correct answer |
+|---|---|
+| Clean (16) | Complete; all rules met; low tier (medium for PT-2 packs pumping over 40,000 m³/yr). One gets a monitoring condition (PM10 above 75% of the limit) |
+| Buffer (6) | Before the cutover: met, low tier. After: **not met** under the 500 m rule, high tier |
+| Quantity above limit (6) | **Not met** (PM10, waste storage or pumping) |
+| Not covered by rules (4) | **Unclear**, with an officer note that no rule covers it |
+| Past refusal or enforcement (4) | Met (or unclear containment), **high tier**, so the section head approves |
+| Licence expiring within 90 days (4) | Complete, but the licence rule is **not met** under v2 |
+| Seeded (20) | Incomplete with the right request-for-information items, except the hostile pack and the second-language pack, which are complete |
+| A2 pack P2-023 | Licence invalid and survey missing, both in the request for information; tier medium (as in the spec's own example) |
+
+**How it was verified.** `check_packs.py` runs **33 of 33 checks, all passing**. It:
+- re-measures every planted defect in the facts (for example, the site plan really is more than 50 m off)
+- confirms there are no *accidental* defects in the clean packs
+- recomputes complete or incomplete with its own separate checklist
+- checks that every finding cites the clause version in force and that every trap is not in force
+- checks the group outcomes above, that each fairness pair has identical answers, and the resubmissions
+- confirms two builds are identical
+
+To prove the checker works, I deliberately broke a copy of the output four ways: removed a planted defect, added an accidental one, changed a fairness answer, and cited the wrong clause version. **It caught all four.**
+
+**New words:**
+- **Facts vs label.** Facts are what the documents *say*. The label is the *correct answer* about them.
+- **Trap (version not in force).** For every finding, the label names the clause version the AI must *not* cite. For example, a pack dated in August must cite `RD-01 Art.6 v2`, and citing `v1` counts as an error.
+- **Request for information (RFI) items.** The exact list of missing or invalid documents the letter to the applicant must name.
+- **Portal payload.** What the online portal sends with a pack: file names and what type the applicant *says* each file is.
+
 ## 5. Decisions made (and why)
 
 | Date | Decision | Why |
@@ -242,6 +392,13 @@ The database load now passes 21 of 21 checks, including the 4 settings tables.
 | 2026-11-25 | A few extra concrete rules were added so every clause can be tested (for example, a pumping test is needed above 20,000 m³/yr, and casing must be grouted to 6 m) | The spec asks for one testable requirement per clause. Stage 6 must make the packs follow them |
 | 2026-11-25 | Precedent summaries leave out applicant names and contact details | The AI reads precedents, and it only needs the facts of the case |
 | 2026-11-25 | The precedent search answer key uses a fixed, written-down scoring rule (close match first, then scored by activity, reason, distance band, quantity and land use) | Makes A-26 ("relevance judged by me") repeatable and checkable instead of hand-picked |
+| 2026-11-25 | Coastal survey conflict planted in two PT-2 packs: P2-006 (before the cutover, passes) and P2-004 (after, fails) | Your choice. Tests the 12-month vs 24-month rule conflict and the in-force filter both ways |
+| 2026-11-25 | The vague containment rule appears in the two PT-1 past-refusal/enforcement packs (P1-001, P1-014) | Your choice. The spec already expects "met or unclear" for that group |
+| 2026-11-25 | Survey age is a rule finding, not a completeness check (the settings table was updated to match) | Otherwise an old survey would make a pack "incomplete" instead of failing a rule, and the coastal case would break its group |
+| 2026-11-25 | Findings are computed for incomplete packs too | Matches the spec's own label example, which shows a finding on an incomplete pack |
+| 2026-11-25 | Recommendation: request information if incomplete; refuse if any rule is not met; approve with conditions if there are conditions; otherwise approve | Fills the `recommendation` column in the database schema with a simple, checkable rule |
+| 2026-11-25 | The low-quality scan defect is applied to the ownership evidence (C4) | Any document would do. C4 keeps the rule findings assessable |
+| 2026-11-25 | Inconsistent quantities stay under the limits in both documents | Keeps it a pure completeness defect, without also changing the rule outcome |
 
 ## 6. Open questions for you
 1. **Nationalities are real-world labels** (for example "Indian" or "British"), but every name comes from a US name list. The fairness test therefore mostly checks name bias, and only weakly. We could keep this, or use name lists from several countries.
@@ -276,10 +433,12 @@ cd ~/Desktop/Upskilling/agentic-ai-techm
 make registry     # registry CSVs + pack plan into data/output/
 make rules        # rule documents (Word, PDF), chunks.jsonl, config_seed.sql
 make precedents   # 60 precedent summaries + the gold top-3 answer key
-make check        # all checks: precedents 24/24, registry 97/97, rules 48/48
+make packs        # facts.json + correct-answer label for all 105 packs
+make check        # all checks: packs 33/33, precedents 24/24, registry 99/99, rules 48/48
 make test         # run the unit tests
 ```
-Run them in this order: `registry`, then `rules`, then `precedents`. Each one reads the output of the one before.
+Run them in this order: `registry`, `rules`, `precedents`, `packs`. Each one reads the output of the one before.
+To look at one pack, open `data/output/packs/P2-023/facts.json` and its answer `data/output/labels/P2-023.json`.
 To read the rules, open the PDFs in `data/output/rules/pdf/` (for example `RD-01_v1.pdf` and `RD-01_v2.pdf` side by side).
 Generated files go to `data/output/`. They are not stored in git, because these commands can always rebuild them, byte for byte.
 

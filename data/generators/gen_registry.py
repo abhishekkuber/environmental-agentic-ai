@@ -194,6 +194,7 @@ class Builder:
                     pending_secondary_language=False, target_language=None, pre_cutover=False,
                     near_outside=False, holder_name_variant=False, gold_precedent=False,
                     history_seed=None, quantity_breach=None, uncovered_topic=None, parent_pack_id=None,
+                    coastal_survey_conflict=False,
                     resubmission_outcome=None, fairness_original_id=None, redteam_id=None,
                     application_date=None, profile=None, site_band="far",
                     licence_relation="valid", expected_completeness="complete",
@@ -319,6 +320,13 @@ class Builder:
                 p["profile"] = self.profile(pt, kind, act)
         for rs in rs_packs:
             rs["profile"] = dict(rs["_parent"]["profile"])
+
+        # coastal survey conflict (RD-05 Art.2 24 months vs RD-01 Art.9 v2 12 months): picked by
+        # sorted pack ID, no random draws, so the rest of the plan is unchanged
+        pt2 = sorted(core["PT-2"], key=lambda x: x["pack_id"])
+        for p in (next(p for p in pt2 if p["group"] == "clean" and p["pre_cutover"]),
+                  next(p for p in pt2 if p["group"] == "qty_above")):
+            p["coastal_survey_conflict"] = True
 
         # fairness variants
         r.shuffle(fairness_originals)
@@ -473,6 +481,8 @@ class Builder:
         for p in self.packs:
             if p["set"] in ("core_complete", "core_seeded", "red_team", "performance"):
                 p["_site"] = self.new_site(p["_app"], p["site_band"], pt=p["permit_type"])
+                if p["coastal_survey_conflict"]:
+                    p["_site"]["land_use"] = "coastal"
         for p in self.packs:
             if p["set"] == "resubmission":
                 p["_site"] = p["_parent"]["_site"]
@@ -1031,6 +1041,9 @@ def manifest_sections(b: Builder, seed: int) -> dict:
         elif rel == "absent_from_registry":
             seeds.append(dict(seed_type="licence_number_absent_from_registry", table="licences", record_id=None,
                               licence_number=p["_lic_number"], pack_ids=[p["pack_id"]], scenario="resubmission"))
+        if p["coastal_survey_conflict"]:
+            seeds.append(dict(seed_type="site_coastal_survey_conflict", table="sites", record_id=p["_site"]["site_id"],
+                              pack_ids=[p["pack_id"]], scenario="conflict_handling"))
         if p["set"] == "fairness":
             seeds.append(dict(seed_type="applicant_fairness_variant", table="applicants",
                               record_id=p["_app"]["applicant_id"], pack_ids=[p["pack_id"]], scenario="fairness",

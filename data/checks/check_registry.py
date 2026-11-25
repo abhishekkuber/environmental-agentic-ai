@@ -271,6 +271,12 @@ def main():
     band_bad = [p["pack_id"] for p in packs.values() if band(edge[p["site_id"]]) != want_band(p)]
     rep.add("pack site distance band", [], band_bad)
 
+    coastal = [p for p in core if p["coastal_survey_conflict"]]
+    rep.add("coastal survey-conflict packs (PT-2 clean pre-cutover + qty_above)",
+            [("PT-2", "clean", True), ("PT-2", "qty_above", False)],
+            sorted(((p["permit_type"], p["group"], p["pre_cutover"]) for p in coastal), key=lambda x: x[1]))
+    rep.add("coastal packs on coastal sites", True, all(S.loc[p["site_id"], "land_use"] == "coastal" for p in coastal))
+
     # registry history of pack applicants
     hist_bad = []
     for p in core:

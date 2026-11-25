@@ -193,13 +193,14 @@ def validation_rules(cfg: dict) -> dict[str, dict]:
                "owner_is_applicant_or_authorised": True, "clauses": ["RD-07 Art.6"], **legible},
         "P1-1": {"fields": ["pollutants", "annual_quantities", "units", "control_measures"],
                  "quantities_match": "C1", "units": ["t/yr", "days"], "clauses": ["RD-07 Art.5"], **legible},
-        "P2-1": {"fields": ["well_depth_m", "diameter_mm", "casing", "abstraction_m3_per_year", "well_lat", "well_lon"],
+        "P2-1": {"fields": ["well_depth_m", "diameter_mm", "casing", "grout_depth_m", "abstraction_m3_per_year",
+                            "well_lat", "well_lon"],
                  "coordinates_match": ["C1", "C2"], "tolerance_m": t["coordinate_tolerance_m"],
                  "abstraction_matches": "C1", "clauses": ["RD-07 Art.5"], **legible},
-        "P2-2": {"fields": ["survey_date", "aquifer", "water_level_m", "surveyor"], "present": True,
-                 "max_age_months": r["survey_max_age_months"],
-                 "max_age_months_coastal_from": {"date": cfg["cutover_date"], "months": r["survey_max_age_months_coastal"]},
-                 "clauses": ["RD-05 Art.2", "RD-01 Art.9"], **legible},
+        # survey AGE is a compliance finding (RD-05 Art.2 / RD-01 Art.9 v2), not a completeness rule
+        "P2-2": {"fields": ["survey_date", "aquifer", "static_water_level_m", "surveyor"], "present": True,
+                 "signed": True, "clauses": ["RD-07 Art.2", "RD-05 Art.3"],
+                 "age_checked_as_finding": ["RD-05 Art.2", "RD-01 Art.9"], **legible},
     }
 
 
