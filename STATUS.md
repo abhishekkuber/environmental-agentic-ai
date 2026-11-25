@@ -157,7 +157,86 @@ These are already done on this laptop:
 On a fresh machine, repeat these steps first.
 
 ## 8. How to run things
-- `make help` lists every command.
-- `make registry` rebuilds the registry and the pack plan. `make check` runs every check. `make test` runs the unit tests.
-- `make db-up` starts the database. `make db-load` loads the registry and checks it. `make db-down` stops the database; the data is kept in a Docker volume.
-- Generated files go to `data/output/`. They are not stored in git, because they can always be rebuilt.
+
+Run every command from the project folder in a terminal:
+```bash
+cd ~/Desktop/Upskilling/agentic-ai-techm
+```
+`make help` lists every command at any time.
+
+### A. First time on a machine (once only)
+1. Do the machine setup in §7.
+2. Create the Python environment and install packages:
+   ```bash
+   make venv
+   ```
+
+### B. Rebuild the data (no Docker needed)
+```bash
+make registry     # generate registry CSVs + pack plan into data/output/
+make check        # run all checks (should end with "97/97 passed")
+make test         # run the unit tests
+```
+Generated files go to `data/output/`. They are not stored in git, because these commands can always rebuild them, byte for byte.
+
+### C. Start the database and load the data
+1. **Start Docker Desktop.** Open it from Applications, or run `open -a Docker`. Wait until the whale icon in the menu bar stops moving, which takes about 30 seconds. Check it is ready:
+   ```bash
+   docker info --format '{{.ServerVersion}}'    # prints a version number when ready
+   ```
+2. **Start SQL Server** (the container is called `uc1-mssql`):
+   ```bash
+   make db-up
+   ```
+3. **Wait for it to finish booting.** Under Rosetta this takes about 30–90 seconds. You can watch for the line "Recovery is complete":
+   ```bash
+   docker logs -f uc1-mssql      # press Ctrl+C to stop watching
+   ```
+   You can also skip this step, because `make db-load` keeps retrying for up to 4 minutes.
+4. **Load the registry and check it:**
+   ```bash
+   make db-load      # should end with "17/17 passed"
+   ```
+   This wipes and rebuilds the `uc1` database each time, so it is always safe to rerun. Any edits made by hand inside the database are lost.
+
+Is it running? `docker ps` should list `uc1-mssql` with status "Up".
+
+### D. Look at the data
+**In VS Code:**
+1. Install the **"SQL Server (mssql)"** extension by Microsoft.
+2. Click its icon in the sidebar, then **Add Connection**, and fill in:
+   - Server `localhost,1433`
+   - SQL Login, user `sa`
+   - Password from `.env` (`grep MSSQL_SA_PASSWORD .env` prints it)
+   - Database `uc1`
+   - **Trust server certificate: Yes**
+3. Browse **Tables / Views**, or open a query window.
+
+**In the terminal:**
+```bash
+set -a; source .env; set +a
+docker exec -it uc1-mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d uc1
+```
+Type a query, then `GO` on its own line to run it, and `exit` to leave. Example:
+```sql
+SELECT TOP 10 * FROM registry.v_applicant_history WHERE prior_refusals > 0;
+GO
+```
+
+### E. Stop everything
+```bash
+make db-down      # stops and removes the container; the data is kept in a Docker volume
+```
+Then quit Docker Desktop if you like. The next time, start again from **C.1**. You don't need to run `make db-load` again unless the data changed.
+
+To delete the database completely and start from zero, run `docker compose down -v`. The `-v` also deletes the stored data. After that, run `make db-up` and `make db-load` again.
+
+### F. If something goes wrong
+| Symptom | Likely cause and fix |
+|---|---|
+| `Cannot connect to the Docker daemon` | Docker Desktop isn't running. Start it (C.1) |
+| `make db-load` says "SQL Server not reachable" | The container is still booting or stopped. Check `docker ps` and `docker logs uc1-mssql`, then rerun |
+| `OpenSSL library could not be loaded` | You ran the loader directly instead of through `make db-load`. Use `make db-load`, which points the driver at OpenSSL 3 |
+| `MSSQL_SA_PASSWORD missing` | `.env` doesn't exist. See §7 |
+| `Login failed for user 'sa'` | The password in `.env` changed after the database was first created. Run `docker compose down -v`, then `make db-up` and `make db-load` |
+| The container stops right after starting | Rosetta is off in Docker Desktop (§7), or the password is too weak |
