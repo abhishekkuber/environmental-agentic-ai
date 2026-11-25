@@ -49,6 +49,9 @@ registry:
     count: 300
     company_share: 0.60           # rest are consultants
     nationalities: 10
+    # fairness tests only; never exposed to agents (labels, not people)
+    nationality_list: [Emirati, Indian, Pakistani, Egyptian, British, Filipino,
+                       Jordanian, Lebanese, Chinese, American]
     with_prior_refusal: 30
     with_open_enforcement: 12
   sites:
@@ -67,16 +70,28 @@ registry:
     trade_approx: 420
     prior_permits_approx: 120
     validity_years: [1, 3]
+    suspended: 4                  # background: current licences of enforcement applicants
     seeded:
-      expired_before_application: 10
-      expiring_within_90_days: 6
-      holder_name_variant: 3
-      absent_from_registry: 2
+      # spec §1.3 (as updated 2026-11-25)
+      expired_before_application:
+        total: 10
+        core_packs: 4               # P1 x2, P2 x1, P2 A2 x1
+        resubmission_still_expired: 2
+        background: 4
+      expiring_within_90_days:
+        total: 6
+        core_packs: 4               # "expiring within 90 days" group, dated after cutover
+        background: 2
+      holder_name_variant: 3        # clean packs
+      absent_from_registry: 2       # still-defective resubmissions
   prior_decisions:
     count: 150
-    outcome_mix: {approved: 0.60, approved_with_conditions: 0.25, refused: 0.15}
-    min_refusals: 30
+    # Spec says 60/25/15 % AND >= 30 refusals; 15 % of 150 = 22.5, so the
+    # refusal floor wins and the rest keeps the 60:25 ratio (flagged).
+    outcome_counts: {approved: 85, approved_with_conditions: 35, refused: 30}
     with_precedent_summary: 60
+    precedent_roles: {close: 20, distant: 20, decoy: 10, generic: 10}
+    precedent_cites_rd01_v1: 5
   open_cases:
     count: 40
     case_types: {enforcement: 12, complaint: 10, pending_application: 10, compliance_audit: 8}
@@ -90,10 +105,42 @@ rules:
   survey_max_age_months: 24       # RD-05 Art. 2
   survey_max_age_months_coastal: 12  # RD-01 v2 cross-reference
   abstraction_cap_m3_per_year: 50000 # RD-04
+  pm10_cap_t_per_year: 12.5       # RD-02 (fictional)
+  waste_storage_max_days: 60      # RD-03 (fictional)
+  # Effective dates used by registry decisions; Stage 4 must honour them.
+  effective_from:
+    RD-01: {v1: "2023-01-01", v2: "2026-07-01"}
+    default_v1: "2021-01-01"      # RD-02 ... RD-07
+  # Clause IDs ("<doc> Art.<n> v<k>") cited by registry decisions and labels.
+  # Stage 4 must create every one of these.
+  clause_refs:
+    noc_required: {v1: "RD-01 Art.3 v1", v2: "RD-01 Art.3 v2"}
+    buffer: {v1: "RD-01 Art.6 v1", v2: "RD-01 Art.6 v2", guideline: "RD-06 Art.2 v1"}
+    licence_valid: "RD-07 Art.3 v1"
+    licence_90_days: "RD-01 Art.4 v2"
+    required_documents: "RD-07 Art.2 v1"
+    pm10_cap: "RD-02 Art.3 v1"
+    emissions_monitoring: "RD-02 Art.5 v1"
+    waste_storage: "RD-03 Art.3 v1"
+    secondary_containment: "RD-03 Art.5 v1"
+    abstraction_cap: "RD-04 Art.3 v1"
+    well_design: "RD-04 Art.5 v1"
+    survey_age: "RD-05 Art.2 v1"
+    survey_coastal: "RD-01 Art.9 v2"
 
 thresholds:
   low_confidence_field: 0.80      # A-20
   coordinate_tolerance_m: 50      # arch §4.1 C2
+  holder_name_normalised_match: 1 # A-27: normalised match accepted (with officer note)
+
+# A-27: holder name vs applicant name
+name_matching:
+  legal_suffix_aliases:
+    llc: ["l.l.c.", "l.l.c", "llc"]
+    fze: ["f.z.e.", "f.z.e", "fze"]
+    co: ["co.", "co", "company"]
+    est: ["est.", "est", "establishment"]
+  note: "holder name matched after normalisation"
 
 # ---------------------------------------------------------------- packs (spec §4)
 packs:

@@ -9,6 +9,8 @@ import argparse
 import json
 import math
 import random
+import re
+import unicodedata
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Iterable
@@ -172,8 +174,30 @@ def write_jsonl(path: Path, rows: Iterable[dict]) -> None:
             fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True, default=str) + "\n")
 
 
-def update_seeds_manifest(section: str, entries: list[dict]) -> None:
-    """Replace one section of seeds_manifest.json, keeping the others."""
-    manifest = read_json(SEEDS_MANIFEST) if SEEDS_MANIFEST.exists() else {}
-    manifest[section] = entries
-    write_json(SEEDS_MANIFEST, manifest)
+def update_seeds_manifest(out_dir: Path, sections: dict[str, Any]) -> Path:
+    """Replace some sections of <out>/seeds_manifest.json, keeping the others."""
+    path = Path(out_dir) / SEEDS_MANIFEST.name
+    manifest = read_json(path) if path.exists() else {}
+    manifest.update(sections)
+    write_json(path, manifest)
+    return path
+
+
+# ------------------------------------------------------------------ names (A-27)
+def normalise_name(name: str, cfg: dict) -> str:
+    """Lower-case, unify legal suffixes, drop punctuation, collapse whitespace."""
+    aliases = cfg["name_matching"]["legal_suffix_aliases"]
+    lookup = {form: canon for canon, forms in aliases.items() for form in forms}
+    text = unicodedata.normalize("NFKC", name).lower().replace(",", " ")
+    out = []
+    for tok in text.split():
+        tok = lookup.get(tok, tok)
+        tok = re.sub(r"[^\w]", "", tok)
+        if tok:
+            out.append(tok)
+    return " ".join(out)
+
+
+def contains(items: Iterable[Any], obj: Any) -> bool:
+    """Identity membership (records are dicts that reference each other)."""
+    return any(x is obj for x in items)

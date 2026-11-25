@@ -25,6 +25,7 @@ The secondary language isn't confirmed yet. Where the spec or other docs mention
 5. **Every rendered document** has the footer: `Exercise content: fictional data.`
 6. **Seeds must be traceable.** Every seeded record is listed in `data/output/seeds_manifest.json` with its seed type and the scenario it serves (A1–A8, fairness, resubmission, R-xx).
 7. Work **stage by stage**. After each stage, run its checks, show me the summary, and **stop for review** before the next stage.
+8. Keep **`STATUS.md`** current: after every stage (and any decision), update it in plain language: stage table, what was done, new terms in the glossary, decisions with dates, open questions.
 
 ## Tech
 - Python 3.11, `uv` or `venv` + `requirements.txt`

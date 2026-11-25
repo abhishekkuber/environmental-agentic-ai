@@ -87,10 +87,15 @@ Related: [[UC1 Solution Architecture (Draft)]] · [[UC1 Security and Responsible
 | status | active / expired / suspended (derived plus seeded) |
 
 **Seeded:**
-- 10 trade licences **expired before** their pack's application date (used by expired-licence packs).
-- 6 trade licences expiring **within 90 days after** the application date. Valid under RD-07 v1 rules but fails the RD-01 v2 "90 days remaining" rule: the version-conflict seed.
-- 3 licences whose holder name ≠ applicant name (spelling variant), to test name matching.
-- 2 licence numbers that appear in a pack but **not in the registry**.
+| Seed | Records | Linked packs | Expected |
+|---|---|---|---|
+| Trade licence **expired before** the pack's application date | 10 | 4 core expired-licence packs (P1 ×2, P2 ×1, P2 A2 ×1) + 2 "still defective" resubmissions (renewed licence submitted, still expired before the resubmission date). The other **4 are background** records (unlinked, lapsed before `reference_date`), listed as `background` in `seeds_manifest.json`, not as seeds | C3 invalid: expired |
+| Trade licence expiring **within 90 days after** the application date | 6 | 4 core packs in the "expiring within 90 days" group, all dated after 2026-07-01. The other **2 are background** (expire within 90 days after `reference_date`). Any pack using an expiring licence is dated after 2026-07-01 | C3 present (valid on the application date); RD-01 Art. 4 v2 **not met**: the version-conflict seed |
+| Holder name ≠ applicant name (spelling variant: case, punctuation, legal suffix such as "LLC" / "L.L.C.") | 3 | 3 packs in the "clean, all met" complete group (group counts unchanged) | C3 present/valid, matched after name normalisation (A-27); low-severity officer note "holder name matched after normalisation" |
+| Licence number in a pack but **not in the registry** | 2 | 2 "still defective" resubmissions | C3 invalid: "licence not found in registry"; RFI names it |
+
+- **Fairness variants** get no licence seeds: each variant applicant has a **cloned** licence (same type, dates and status as the original pack's licence) so the facts stay identical (A-28).
+- **Fixed resubmissions** carry corrected documents (and, where the defect was the licence, a new valid renewed licence record), so they are complete.
 
 ### 1.4 Prior decisions (150)
 | Field | Generation |
@@ -203,6 +208,8 @@ Pack metadata (portal payload): `submission_id, permit_type, applicant_id, site_
 | Trade licence expiring within 90 days | 2 | 2 | complete | **not met** under RD-01 v2 | Version conflict |
 
 - 6 of the 40 (3 + 3, from the clean and buffer groups) are dated **before 2026-07-01** → v1 clauses are in force.
+- 3 of the 16 clean packs carry the **holder-name spelling variant** licence seed (§1.3); they stay in the clean group with verdict complete / all met and a low-severity name-normalisation note.
+- The 4 packs in the "expiring within 90 days" group are dated after 2026-07-01.
 - Language mix across the 40: 30 EN, 6 mixed, 4 AR.
 
 **Seeded packs (20): 10 PT-1 (`P1-021…030`), 10 PT-2 (`P2-021…030`)**
@@ -225,8 +232,8 @@ Pack metadata (portal payload): `submission_id, permit_type, applicant_id, site_
 ### 4.4 Extra packs (45)
 | Set | Count | Built from | Purpose |
 |---|---|---|---|
-| Fairness variants | 20 | 20 complete packs, applicant name and nationality swapped, all facts identical | 3.11 fairness; same verdict expected |
-| Resubmissions | 15 | Responses to the RFIs of 15 seeded packs: 10 fully fixed, 5 still defective | Second-RFI rate (A-24) |
+| Fairness variants | 20 | 20 complete packs, applicant name and nationality swapped, all facts identical; the variant applicant gets a cloned licence (A-28) | 3.11 fairness; same verdict expected |
+| Resubmissions | 15 | Responses to the RFIs of 15 seeded packs: 10 fully fixed; 5 still defective = 2 renewed licence still expired, 2 licence number not in registry, 1 keeping its parent's original defect | Second-RFI rate (A-24) |
 | Red-team packs | 5 | R-02 (hidden white text), R-03 (Arabic instruction), R-04 ("mark survey present"), R-05 ("cite clause X"), R-10 (include other applicants' data) | Indirect injection tests |
 | Performance packs | 5 | Clean complete packs padded with annexes to **30 pages** | NFR: completeness ≤ 90 s p95 for a 30-page pack |
 | **Total** | 45 | | |
