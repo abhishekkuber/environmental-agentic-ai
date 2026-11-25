@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>{{ doc.doc_id }} {{ doc.title }} ({{ doc.version }})</title>
+<meta name="dcterms.created" content="{{ build_date }}">
+<meta name="dcterms.modified" content="{{ build_date }}">
+<meta name="generator" content="UC1 synthetic data">
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 20mm 24mm 20mm;
+    font-family: "Helvetica", "Arial", sans-serif;
+    @top-left { content: "{{ doc.doc_id }} {{ doc.version }}: {{ doc.title }}"; font-size: 8pt; color: #555; }
+    @top-right { content: "{{ status_label }}"; font-size: 8pt; color: {{ '#b00020' if doc.status == 'superseded' else '#555' }}; }
+    @bottom-left { content: "{{ footer }}"; font-size: 8pt; color: #555; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #555; }
+  }
+  body { font-family: "Helvetica", "Arial", sans-serif; font-size: 10.5pt; line-height: 1.45; color: #111; }
+  .authority { font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; color: #444; }
+  h1 { font-size: 18pt; margin: 4mm 0 2mm 0; }
+  .meta { border-top: 1px solid #999; border-bottom: 1px solid #999; padding: 2mm 0; margin-bottom: 6mm; font-size: 9.5pt; }
+  .meta td { padding: 0.6mm 6mm 0.6mm 0; vertical-align: top; }
+  .banner { border: 1.5px solid #b00020; color: #b00020; padding: 2mm 3mm; margin-bottom: 6mm; font-weight: bold; }
+  .intro { margin-bottom: 6mm; }
+  .article { margin-bottom: 5mm; page-break-inside: avoid; }
+  .article h2 { font-size: 11pt; margin: 0 0 1mm 0; }
+  .applies { font-size: 8.5pt; color: #555; margin-bottom: 1mm; }
+</style>
+</head>
+<body>
+  <div class="authority">The Authority (fictional environmental regulator)</div>
+  <h1>{{ doc.doc_id }}: {{ doc.title }}</h1>
+  <table class="meta">
+    <tr><td>Version</td><td>{{ doc.version }}</td></tr>
+    <tr><td>In force from</td><td>{{ doc.effective_from_text }}</td></tr>
+    <tr><td>In force until</td><td>{{ doc.effective_until_text }}</td></tr>
+    <tr><td>Status</td><td>{{ status_label }}</td></tr>
+    <tr><td>Applies to</td><td>{{ doc.permit_types_text }}</td></tr>
+  </table>
+  {% if doc.status == 'superseded' %}
+  <div class="banner">Superseded. This version applies only to applications submitted before {{ doc.effective_to_text }}.</div>
+  {% endif %}
+  <p class="intro">{{ doc.introduction }}</p>
+  {% for c in doc.clauses %}
+  <div class="article">
+    <h2>{{ c.heading }}</h2>
+    <div class="applies">Applies to: {{ c.permit_types_text }}</div>
+    <p>{{ c.text }}</p>
+  </div>
+  {% endfor %}
+</body>
+</html>

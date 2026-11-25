@@ -1,0 +1,64 @@
+# Exercise content: fictional rules. Hand-written; rendered by gen_rules.py.
+# Seeded ambiguity: Art.5 "adequate secondary containment" has no numeric
+# definition anywhere in the corpus -> expected verdict "unclear".
+doc_id: RD-03
+doc_title: {en: Waste Storage and Handling Guideline}
+version: v1
+effective_from: "2021-01-01"
+effective_to: null
+status: current
+permit_types: [PT-1]
+languages_planned: [en]
+introduction:
+  en: >-
+    This Guideline sets how industrial waste is stored and handled at facilities that hold
+    or apply for an Environmental NOC.
+clauses:
+  - clause_id: RD-03 Art.1
+    article: "1"
+    title: {en: Scope}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        This Guideline applies to the storage and handling of industrial waste at facilities
+        that hold or apply for an Environmental NOC.
+  - clause_id: RD-03 Art.2
+    article: "2"
+    title: {en: Waste classification}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        Waste shall be classified as hazardous or non-hazardous before it is stored.
+  - clause_id: RD-03 Art.3
+    article: "3"
+    title: {en: Maximum storage period}
+    permit_types: [PT-1]
+    params: {waste_storage_max_days: 60}
+    text:
+      en: >-
+        Waste shall not be stored on site for more than 60 days before it is transferred to a
+        licensed waste facility.
+  - clause_id: RD-03 Art.4
+    article: "4"
+    title: {en: Labelling and segregation}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        Every waste container shall be labelled with the waste type and the date storage
+        began. Hazardous and non-hazardous waste shall be stored separately.
+  - clause_id: RD-03 Art.5
+    article: "5"
+    title: {en: Secondary containment}
+    permit_types: [PT-1]
+    params: {ambiguous: true}
+    text:
+      en: >-
+        Liquid waste shall be stored with adequate secondary containment.
+  - clause_id: RD-03 Art.6
+    article: "6"
+    title: {en: Transfer records}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        The operator shall keep a transfer record for each waste consignment for at least
+        three years.

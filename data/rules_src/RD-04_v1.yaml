@@ -1,0 +1,74 @@
+# Exercise content: fictional rules. Hand-written; rendered by gen_rules.py.
+doc_id: RD-04
+doc_title: {en: Groundwater Well Drilling Regulation}
+version: v1
+effective_from: "2021-01-01"
+effective_to: null
+status: current
+permit_types: [PT-2]
+languages_planned: [en, secondary] # secondary translation pending (spec §2.1)
+introduction:
+  en: >-
+    This Regulation sets the requirements for drilling, building and using groundwater wells.
+clauses:
+  - clause_id: RD-04 Art.1
+    article: "1"
+    title: {en: Scope}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        This Regulation applies to the drilling, construction and use of groundwater wells.
+  - clause_id: RD-04 Art.2
+    article: "2"
+    title: {en: Permit required}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        No person shall drill a new well or deepen an existing well without a groundwater well
+        permit issued by the Authority.
+  - clause_id: RD-04 Art.3
+    article: "3"
+    title: {en: Abstraction limit}
+    permit_types: [PT-2]
+    params: {abstraction_cap_m3_per_year: 50000}
+    text:
+      en: >-
+        The planned annual abstraction from a single well shall not exceed 50,000 m³ unless a
+        hydrogeological impact assessment is submitted with the application.
+  - clause_id: RD-04 Art.4
+    article: "4"
+    title: {en: Well spacing}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        A new well shall be at least 250 m from any existing permitted well owned by another person.
+  - clause_id: RD-04 Art.5
+    article: "5"
+    title: {en: Well design}
+    permit_types: [PT-2]
+    params: {casing_grout_min_depth_m: 6}
+    text:
+      en: >-
+        The well design shall state the well depth, borehole diameter and casing. The casing
+        shall be grouted from the surface to at least 6 m below ground level.
+  - clause_id: RD-04 Art.6
+    article: "6"
+    title: {en: Metering}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        Every permitted well shall be fitted with a calibrated flow meter before abstraction begins.
+  - clause_id: RD-04 Art.7
+    article: "7"
+    title: {en: Registered driller}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        Drilling shall be carried out by a contractor registered with the Authority.
+  - clause_id: RD-04 Art.8
+    article: "8"
+    title: {en: Decommissioning}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        A well that is no longer used shall be sealed within 120 days of its last use.

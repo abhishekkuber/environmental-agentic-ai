@@ -1,0 +1,105 @@
+# Exercise content: fictional rules. Hand-written; rendered by gen_rules.py.
+# Seeded version conflicts with v1: Art.4 (90-day licence validity, new),
+# Art.6 (buffer 300 m -> 500 m), Art.9 (12-month survey for coastal sites).
+doc_id: RD-01
+doc_title: {en: Environmental NOC Regulation}
+version: v2
+effective_from: "2026-07-01"
+effective_to: null
+status: current
+permit_types: [PT-1, PT-2]
+languages_planned: [en, secondary]
+introduction:
+  en: >-
+    This Regulation is issued by the Authority. It sets the requirements for an
+    Environmental No-Objection Certificate (NOC) and the general requirements that also
+    apply to groundwater well permit applications. This version is in force from
+    1 July 2026 and replaces version 1.
+clauses:
+  - clause_id: RD-01 Art.1
+    article: "1"
+    title: {en: Scope}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        This Regulation applies to applications for an Environmental NOC for development or
+        industrial activities, and its general articles also apply to groundwater well permit
+        applications.
+  - clause_id: RD-01 Art.2
+    article: "2"
+    title: {en: Definitions}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        In this Regulation, "protected area" means an area listed in the Authority's register
+        under RD-06; "application date" means the date on which an application is first
+        submitted; "buffer" means a distance measured from the boundary of a protected area;
+        and "coastal site" means a site whose recorded land use is coastal.
+  - clause_id: RD-01 Art.3
+    article: "3"
+    title: {en: NOC required}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        No person shall start a development or industrial activity that releases emissions to
+        air or stores industrial waste without an Environmental NOC issued by the Authority.
+  - clause_id: RD-01 Art.4
+    article: "4"
+    title: {en: Trade licence}
+    permit_types: [PT-1, PT-2]
+    params: {licence_min_remaining_days: 90}
+    text:
+      en: >-
+        The applicant shall hold a trade licence issued for the activity applied for. The
+        trade licence shall remain valid for at least 90 days after the application date.
+  - clause_id: RD-01 Art.5
+    article: "5"
+    title: {en: Emissions and waste information}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        An NOC application shall include an emissions and waste summary prepared in accordance
+        with RD-02 and RD-03.
+  - clause_id: RD-01 Art.6
+    article: "6"
+    title: {en: Buffer from protected areas}
+    permit_types: [PT-1, PT-2]
+    params: {buffer_m: 500}
+    text:
+      en: >-
+        No activity subject to this Regulation shall be located within 500 m of the boundary
+        of a protected area.
+  - clause_id: RD-01 Art.7
+    article: "7"
+    title: {en: Conditions}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        The Authority may attach conditions to an NOC or permit, including monitoring,
+        reporting or containment requirements, where a requirement is met but the declared
+        value is close to its limit.
+  - clause_id: RD-01 Art.8
+    article: "8"
+    title: {en: Validity}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        An NOC or permit is valid for the period stated in it, which shall not exceed three years.
+  - clause_id: RD-01 Art.9
+    article: "9"
+    title: {en: Hydrogeological survey for coastal sites}
+    permit_types: [PT-2]
+    params: {survey_max_age_months_coastal: 12}
+    text:
+      en: >-
+        For a coastal site, the hydrogeological survey shall be no more than 12 months old on
+        the application date. This limit applies in place of the general limit in RD-05 Art. 2.
+        For other sites, the survey shall meet the requirements of RD-05.
+  - clause_id: RD-01 Art.10
+    article: "10"
+    title: {en: Transitional provisions}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        Applications submitted before 1 July 2026 are assessed under version 1 of this
+        Regulation. Applications submitted on or after 1 July 2026 are assessed under this version.

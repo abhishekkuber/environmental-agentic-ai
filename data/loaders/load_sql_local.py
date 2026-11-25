@@ -145,6 +145,7 @@ def verify(conn: pyodbc.Connection, csv_counts: dict[str, int]) -> list[tuple[st
 def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--registry", type=Path, default=ROOT / "data" / "output" / "registry")
+    p.add_argument("--config-seed", type=Path, default=ROOT / "data" / "output" / "rules" / "config_seed.sql")
     args = p.parse_args()
     load_dotenv(ROOT / ".env")
     if not os.getenv("MSSQL_SA_PASSWORD"):
@@ -162,8 +163,21 @@ def main():
         counts[t] = load_table(conn, args.registry, t)
         print(f"loaded {t:16s} {counts[t]}")
     conn.autocommit = True
+    config_rows = None
+    if args.config_seed.exists():  # Stage 4 output
+        conn.cursor().execute(args.config_seed.read_text(encoding="utf-8"))
+        config_rows = {t: conn.cursor().execute(f"SELECT COUNT(*) FROM config.{t}").fetchval()
+                       for t in ("checklist_items", "risk_factors", "risk_tiers", "thresholds")}
+        print(f"config seeded: {config_rows}")
+    else:
+        print(f"config_seed.sql not found ({args.config_seed}); run `make rules` to seed config tables")
 
     rows = verify(conn, counts)
+    if config_rows is not None:
+        sql = args.config_seed.read_text(encoding="utf-8")
+        for t, n in config_rows.items():
+            want = len(re.findall(rf"INSERT INTO config\.{t} ", sql))
+            rows.append((f"rows config.{t}", str(want), str(n), n == want))
     w = max(len(r[0]) for r in rows)
     print(f"\n{'check':{w}}  {'target':18}  actual")
     for name, t, a, ok in rows:

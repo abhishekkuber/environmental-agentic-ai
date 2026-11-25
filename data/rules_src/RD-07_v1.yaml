@@ -1,0 +1,90 @@
+# Exercise content: fictional rules. Hand-written; rendered by gen_rules.py.
+# Art.2 is the source of config.checklist_items (spec §2.4).
+doc_id: RD-07
+doc_title: {en: General Application Requirements}
+version: v1
+effective_from: "2021-01-01"
+effective_to: null
+status: current
+permit_types: [PT-1, PT-2]
+languages_planned: [en, secondary] # secondary translation pending (spec §2.1)
+introduction:
+  en: >-
+    This document sets the general requirements that every application to the Authority
+    must meet, including the documents that make an application complete.
+clauses:
+  - clause_id: RD-07 Art.1
+    article: "1"
+    title: {en: Scope}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        This document sets the general requirements for every Environmental NOC (PT-1) and
+        groundwater well permit (PT-2) application.
+  - clause_id: RD-07 Art.2
+    article: "2"
+    title: {en: Required documents}
+    permit_types: [PT-1, PT-2]
+    params:
+      required_documents:
+        PT-1: [C1, C2, C3, C4, P1-1]
+        PT-2: [C1, C2, C3, C4, P2-1, P2-2]
+    text:
+      en: >-
+        An application is complete only if it includes the following documents. For PT-1: the
+        application form (C1), site plan (C2), trade licence copy (C3), ownership evidence (C4)
+        and emissions or waste summary (P1-1). For PT-2: the application form (C1), site plan
+        (C2), trade licence copy (C3), ownership evidence (C4), well design (P2-1) and
+        hydrogeological survey (P2-2).
+  - clause_id: RD-07 Art.3
+    article: "3"
+    title: {en: Trade licence copy}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        The trade licence copy shall show a licence that exists in the Authority's licence
+        register, is held by the applicant and has not expired on the application date.
+        Differences between the holder name and the applicant name only in letter case,
+        punctuation or the written form of a legal suffix are not treated as a mismatch.
+  - clause_id: RD-07 Art.4
+    article: "4"
+    title: {en: Signature}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        The application form shall be signed and dated by the applicant or an authorised
+        representative.
+  - clause_id: RD-07 Art.5
+    article: "5"
+    title: {en: Consistency between documents}
+    permit_types: [PT-1, PT-2]
+    params: {coordinate_tolerance_m: 50}
+    text:
+      en: >-
+        Site coordinates stated in different documents of the same application shall agree
+        within 50 m, and the quantities declared in the application form shall equal those
+        stated in the technical documents.
+  - clause_id: RD-07 Art.6
+    article: "6"
+    title: {en: Ownership evidence}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        The ownership evidence shall refer to the same plot as the site plan and name the
+        applicant as owner, or be accompanied by the owner's written authorisation.
+  - clause_id: RD-07 Art.7
+    article: "7"
+    title: {en: Legibility}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        Every document shall be legible. A page that cannot be read is treated as not submitted.
+  - clause_id: RD-07 Art.8
+    article: "8"
+    title: {en: Request for information}
+    permit_types: [PT-1, PT-2]
+    params: {rfi_response_days: 30}
+    text:
+      en: >-
+        Where an application is incomplete, the Authority shall send a request for information
+        listing each missing or invalid item. The applicant shall respond within 30 days.

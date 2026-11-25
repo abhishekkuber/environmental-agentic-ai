@@ -1,0 +1,70 @@
+# Exercise content: fictional rules. Hand-written; rendered by gen_rules.py.
+doc_id: RD-02
+doc_title: {en: Air Emissions Technical Standard}
+version: v1
+effective_from: "2021-01-01"
+effective_to: null
+status: current
+permit_types: [PT-1]
+languages_planned: [en]
+introduction:
+  en: >-
+    This Technical Standard sets limits and controls for emissions to air from facilities
+    that require an Environmental NOC.
+clauses:
+  - clause_id: RD-02 Art.1
+    article: "1"
+    title: {en: Scope}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        This Standard applies to facilities that release dust or combustion gases to air and
+        require an Environmental NOC.
+  - clause_id: RD-02 Art.2
+    article: "2"
+    title: {en: Definitions}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        "PM10" means particulate matter with a diameter of 10 micrometres or less. Annual
+        quantities are stated in tonnes per year (t/yr).
+  - clause_id: RD-02 Art.3
+    article: "3"
+    title: {en: PM10 emission limit}
+    permit_types: [PT-1]
+    params: {pm10_cap_t_per_year: 12.5}
+    text:
+      en: >-
+        The declared annual PM10 emissions of a facility shall not exceed 12.5 t/yr.
+  - clause_id: RD-02 Art.4
+    article: "4"
+    title: {en: Stack height}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        Every point-source stack shall discharge at least 3 m above the highest roof within
+        30 m of the stack.
+  - clause_id: RD-02 Art.5
+    article: "5"
+    title: {en: Continuous monitoring}
+    permit_types: [PT-1]
+    params: {monitoring_trigger_share_of_cap: 0.75}
+    text:
+      en: >-
+        Where declared annual PM10 emissions exceed 75% of the limit in Art. 3, the operator
+        shall install continuous particulate monitoring and report the results every quarter.
+  - clause_id: RD-02 Art.6
+    article: "6"
+    title: {en: Dust control}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        Open stockpiles of dusty material shall be covered or kept damp when not in use.
+  - clause_id: RD-02 Art.7
+    article: "7"
+    title: {en: Annual reporting}
+    permit_types: [PT-1]
+    text:
+      en: >-
+        The operator shall submit an annual emissions report to the Authority by 31 March of
+        each year.

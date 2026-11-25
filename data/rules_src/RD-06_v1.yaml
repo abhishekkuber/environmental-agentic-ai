@@ -1,0 +1,54 @@
+# Exercise content: fictional rules. Hand-written; rendered by gen_rules.py.
+doc_id: RD-06
+doc_title: {en: Protected Areas and Buffer Zones Guideline}
+version: v1
+effective_from: "2021-01-01"
+effective_to: null
+status: current
+permit_types: [PT-1, PT-2]
+languages_planned: [en]
+introduction:
+  en: >-
+    This Guideline explains how protected areas are recorded and how distances to them are
+    measured. The buffer distance itself is set in RD-01 Art. 6.
+clauses:
+  - clause_id: RD-06 Art.1
+    article: "1"
+    title: {en: Protected area categories}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        Protected areas include mangroves, wetlands, marine reserves, wildlife reserves and
+        aquifer protection zones, as listed in the Authority's register.
+  - clause_id: RD-06 Art.2
+    article: "2"
+    title: {en: Measuring the distance}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        The distance from a site to a protected area is measured from the site coordinates to
+        the nearest point on the boundary of the protected area. The buffer distance that
+        applies is the one set in RD-01 Art. 6 in force on the application date.
+  - clause_id: RD-06 Art.3
+    article: "3"
+    title: {en: Recorded boundaries}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        Where the register records a protected area as a circle, its boundary is the circle
+        defined by the recorded centre and radius.
+  - clause_id: RD-06 Art.4
+    article: "4"
+    title: {en: Notifying the area manager}
+    permit_types: [PT-1, PT-2]
+    text:
+      en: >-
+        Where a site lies less than 200 m outside the applicable buffer, the Authority shall
+        notify the manager of the protected area about the application.
+  - clause_id: RD-06 Art.5
+    article: "5"
+    title: {en: Aquifer protection zones}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        No new well shall be drilled inside an aquifer protection zone.

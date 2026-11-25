@@ -1,6 +1,6 @@
 # Project status: UC1 synthetic data
 
-*Last updated: 2026-11-25, after Stage 3. Updated at the end of every stage.*
+*Last updated: 2026-11-25, after Stage 4. Updated at the end of every stage.*
 
 ## 1. What this project is, in one paragraph
 
@@ -13,7 +13,7 @@ We are building a pretend environmental regulator ("the Authority") that receive
 | 1. Skeleton | Folders, settings file, build commands, shared helper code | **Done** (committed) |
 | 2. Registry | The Authority's "database": applicants, sites, licences, past decisions, open cases. Also a plan for every application pack | **Done** (committed, `49cc2d4`) |
 | 3. Local database | Loads the registry into a real SQL Server running on this laptop | **Done** (committed) |
-| 4. Rules | The fake regulations (7 documents, about 52 clauses) as Word, PDF and search-ready chunks | Not started |
+| 4. Rules | The fake regulations (7 documents, 8 versions, 60 clauses) as Word, PDF and search-ready chunks, plus the settings tables (checklists, risk weights, thresholds) | **Done** (committed) |
 | 5. Precedents | 60 short write-ups of past decisions the AI can look up | Not started |
 | 6. Pack facts and answers | For each of the 105 application packs: the facts, and the correct verdict | Not started |
 | 7. Rendering | Turns the facts into PDF documents, some made to look like bad scans | Not started |
@@ -132,6 +132,59 @@ We are building a pretend environmental regulator ("the Authority") that receive
 
 **Setup problem we hit (fixed).** Microsoft's database driver looks for OpenSSL version 3 or older, but Homebrew now installs version 4 as its default. The `make db-load` command now points the driver at OpenSSL 3, which you already have, and this applies to that command only. Nothing on the laptop was changed.
 
+### Stage 4: Rules (committed)
+
+**What was written.** Seven fake regulations, hand-written as YAML files in `data/rules_src/` (one file per version):
+
+| Doc | Title | Applies to | Versions | Clauses |
+|---|---|---|---|---|
+| RD-01 | Environmental NOC Regulation | both (mostly PT-1) | v1 (2023-01-01 to 2026-06-30, superseded) and v2 (from 2026-07-01, current) | 10 + 10 |
+| RD-02 | Air Emissions Technical Standard | PT-1 | v1 | 7 |
+| RD-03 | Waste Storage and Handling Guideline | PT-1 | v1 | 6 |
+| RD-04 | Groundwater Well Drilling Regulation | PT-2 | v1 | 8 |
+| RD-05 | Hydrogeological Survey Technical Standard | PT-2 | v1 | 6 |
+| RD-06 | Protected Areas and Buffer Zones Guideline | both | v1 | 5 |
+| RD-07 | General Application Requirements | both | v1 | 8 |
+
+**What `make rules` produces** (in `data/output/rules/`):
+- **A Word and a PDF file per version** (8 of each). Each has the footer "Exercise content: fictional data." on every page, and v1 of RD-01 carries a red "Superseded" banner.
+- **`chunks.jsonl`.** One record per clause: 60 in total. This is the file the AI's search index will be built from later. Each record holds the clause text plus its document, article, version, in-force dates, status, language, permit types, and the PDF page it appears on.
+- **`config_seed.sql`.** It fills the database's settings tables:
+  - the document checklist per permit type, with 11 items copied from RD-07 Art. 2
+  - the 7 risk factors and their weights
+  - the 3 risk tiers
+  - 14 thresholds
+  
+  `make db-load` now loads it too.
+
+**The planted rule cases** (the spec's "seeded rules"):
+- **Buffer changes between versions.** RD-01 Art. 6 says 300 m in v1 and 500 m in v2.
+- **Licence rule is new in v2.** RD-01 Art. 4 v2 adds "the trade licence must stay valid at least 90 days after the application date". v1 only says "hold a trade licence", so v1 is a trap.
+- **Two clauses disagree on survey age.** RD-05 Art. 2 says the survey must be at most 24 months old. RD-01 Art. 9 v2 says at most 12 months for coastal sites. The newer, more specific rule wins, and the AI should point out the conflict.
+- **Numeric limits:**
+  - PM10 dust at most 12.5 t/yr (RD-02 Art. 3)
+  - waste stored at most 60 days (RD-03 Art. 3)
+  - water pumped at most 50,000 m³/yr per well (RD-04 Art. 3)
+- **Deliberately vague.** RD-03 Art. 5 says "adequate secondary containment" with no number anywhere, so the right verdict is "unclear".
+- **Deliberate gaps.** No clause mentions noise, desalination brine, data-centre cooling water, temporary activities or solar farms. The checker scans every clause to make sure.
+
+**How it was verified.** An independent checker (`check_rules.py`) runs **48 of 48 checks, all passing**. Among them:
+- every threshold the packs will be tested against appears in a clause, both as a number and in the text
+- for every day from 2023 to 2027, exactly one version of each RD-01 article is in force
+- every clause cited by the 150 past decisions exists and was in force on the decision date
+- the checklist in the database matches RD-07 Art. 2
+- every clause's text really appears in the PDF on the page recorded for it
+- two separate builds are byte-identical
+
+The database load now passes 21 of 21 checks, including the 4 settings tables.
+
+**New words:**
+- **Clause ID vs clause reference.** `RD-01 Art.6` is the clause ID, which stays the same across versions. `RD-01 Art.6 v2` is the clause reference, meaning that particular version. Findings and past decisions cite the reference, so you can always tell which version was used.
+- **Chunk.** One clause cut out as a separate record, ready for a search index. The AI searches chunks, not whole documents.
+- **Exclusive end date.** RD-01 v1 is stored with `effective_to = 2026-07-01`, meaning "in force up to but not including 1 July". The document text says "until 30 June 2026". See the decision below for why.
+- **Risk score and tier.** Each risk factor adds points, for example a past refusal adds 3 and a rule not met adds 2. The total picks the tier: 0 is low, 1–2 is medium, 3 or more is high. High-tier cases must be approved by the section head.
+- **Secondary-language translations.** The spec wants RD-01, RD-04 and RD-07 in the second language as well. These are listed as pending in `seeds_manifest.json`.
+
 ## 5. Decisions made (and why)
 
 | Date | Decision | Why |
@@ -143,10 +196,15 @@ We are building a pretend environmental regulator ("the Authority") that receive
 | 2026-11-25 | Past decisions split 85 / 35 / 30 | The spec asked for both "15% refused" and "at least 30 refused". 15% of 150 is only 22.5, so the minimum of 30 wins |
 | 2026-11-25 | Fictional rule numbers fixed now: PM10 cap 12.5 t/yr, waste storage at most 60 days, water abstraction at most 50,000 m³/yr | Past decisions already quote these, so the rule documents in Stage 4 must match |
 | 2026-11-25 | Two clean packs (`P1-004`, `P2-020`) sit 500–700 m from a protected area | Checks that the AI doesn't flag a site that is close but legal |
+| 2026-11-25 | RD-01 v1 stored as ending on 2026-07-01 (exclusive), not 2026-06-30 | The in-force rule (A-12) treats the end date as "strictly after". With 06-30 stored, no version of RD-01 would apply on 30 June itself. The document text still says "until 30 June 2026" |
+| 2026-11-25 | Clauses are cited as `RD-01 Art.6 v2` (with version); `clause_id` stays version-free | Matches the database, which stores clause ID and version separately, and the label example in the spec |
+| 2026-11-25 | Risk weights: refusal 3, open enforcement 3, inside buffer 2, a rule not met 2, two or more unclear 1, PT-2 pumping above 40,000 m³/yr 1, low-confidence fields 1. Tiers: low 0, medium 1–2, high 3 or more | Turns assumption A-16 into numbers. It gives the spec's expected tiers: clean packs low or medium, and packs from applicants with a past refusal or open enforcement high |
+| 2026-11-25 | A few extra concrete rules were added so every clause can be tested (for example, a pumping test is needed above 20,000 m³/yr, and casing must be grouted to 6 m) | The spec asks for one testable requirement per clause. Stage 6 must make the packs follow them |
 
 ## 6. Open questions for you
 1. **Nationalities are real-world labels** (for example "Indian" or "British"), but every name comes from a US name list. The fairness test therefore mostly checks name bias, and only weakly. We could keep this, or use name lists from several countries.
 2. **Scenarios A6 and A7** are mentioned but never defined in the documents. Nothing is tagged with them yet.
+3. **RD-01 v1 end date.** Is it OK to store it as 2026-07-01 (exclusive), as described in §5? The alternative is changing the in-force rule in A-12 to "on or after".
 
 ## 7. Machine setup (done)
 These are already done on this laptop:
@@ -173,10 +231,13 @@ cd ~/Desktop/Upskilling/agentic-ai-techm
 
 ### B. Rebuild the data (no Docker needed)
 ```bash
-make registry     # generate registry CSVs + pack plan into data/output/
-make check        # run all checks (should end with "97/97 passed")
+make registry     # registry CSVs + pack plan into data/output/
+make rules        # rule documents (Word, PDF), chunks.jsonl, config_seed.sql
+make check        # all checks: registry "97/97 passed", rules "48/48 passed"
 make test         # run the unit tests
 ```
+Run `make registry` before `make rules`. The rules checker also confirms every clause the past decisions cite.
+To read the rules, open the PDFs in `data/output/rules/pdf/` (for example `RD-01_v1.pdf` and `RD-01_v2.pdf` side by side).
 Generated files go to `data/output/`. They are not stored in git, because these commands can always rebuild them, byte for byte.
 
 ### C. Start the database and load the data
@@ -195,8 +256,9 @@ Generated files go to `data/output/`. They are not stored in git, because these 
    You can also skip this step, because `make db-load` keeps retrying for up to 4 minutes.
 4. **Load the registry and check it:**
    ```bash
-   make db-load      # should end with "17/17 passed"
+   make db-load      # should end with "21/21 passed"
    ```
+   This also fills the settings tables (checklists, risk weights, thresholds) when `make rules` has been run. Without it you get 17 checks.
    This wipes and rebuilds the `uc1` database each time, so it is always safe to rerun. Any edits made by hand inside the database are lost.
 
 Is it running? `docker ps` should list `uc1-mssql` with status "Up".

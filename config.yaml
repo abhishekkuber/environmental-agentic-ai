@@ -127,6 +127,38 @@ rules:
     well_design: "RD-04 Art.5 v1"
     survey_age: "RD-05 Art.2 v1"
     survey_coastal: "RD-01 Art.9 v2"
+    pumping_test: "RD-05 Art.5 v1"
+    metering: "RD-04 Art.6 v1"
+    signature: "RD-07 Art.4 v1"
+    consistency: "RD-07 Art.5 v1"
+    ownership: "RD-07 Art.6 v1"
+    legibility: "RD-07 Art.7 v1"
+    rfi: "RD-07 Art.8 v1"
+  # RD-01 v1 ends where v2 starts. effective_to is EXCLUSIVE (A-12: in force
+  # if effective_from <= date < effective_to); the document text says
+  # "until 30 June 2026".
+  effective_to:
+    RD-01: {v1: "2026-07-01"}
+  pumping_test_above_m3_per_year: 20000   # RD-05 Art.5
+  pumping_test_min_hours: 24
+  rfi_response_days: 30                   # RD-07 Art.8
+
+# A-16 / A-17: additive risk score -> tier -> approver. Used by config_seed.sql
+# (Stage 4) and the pack labels (Stage 6).
+risk:
+  factors:
+    prior_refusal:        {weight: 3, description: "Applicant has at least one prior refusal"}
+    open_enforcement:     {weight: 3, description: "Applicant has an open enforcement case"}
+    in_buffer:            {weight: 2, description: "Site within the protected-area buffer in force on the application date"}
+    finding_not_met:      {weight: 2, description: "At least one compliance finding is not met"}
+    multiple_unclear:     {weight: 1, description: "Two or more compliance findings are unclear"}
+    high_abstraction:     {weight: 1, description: "PT-2 planned abstraction above 40,000 m3/yr"}
+    low_confidence_fields: {weight: 1, description: "One or more key fields below the confidence threshold"}
+  high_abstraction_m3_per_year: 40000
+  tiers:                  # tier applies when score >= min_score
+    low:    {min_score: 0, approver_role: technical_reviewer}
+    medium: {min_score: 1, approver_role: technical_reviewer}
+    high:   {min_score: 3, approver_role: section_head}
 
 thresholds:
   low_confidence_field: 0.80      # A-20
@@ -157,8 +189,17 @@ packs:
   footer: "Exercise content: fictional data."
 
 permit_types:
-  PT-1: {department: air_industrial, documents: [C1, C2, C3, C4, P1-1]}
-  PT-2: {department: groundwater, documents: [C1, C2, C3, C4, P2-1, P2-2]}
+  PT-1: {department: air_industrial, name: Environmental NOC, documents: [C1, C2, C3, C4, P1-1]}
+  PT-2: {department: groundwater, name: Groundwater well permit, documents: [C1, C2, C3, C4, P2-1, P2-2]}
+
+document_names:
+  C1: Application form
+  C2: Site plan
+  C3: Trade licence copy
+  C4: Ownership evidence
+  P1-1: Emissions or waste summary
+  P2-1: Well design
+  P2-2: Hydrogeological survey
 
 # ---------------------------------------------------------------- eval (spec §7)
 eval:

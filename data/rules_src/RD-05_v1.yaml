@@ -1,0 +1,64 @@
+# Exercise content: fictional rules. Hand-written; rendered by gen_rules.py.
+# Seeded conflict: Art.2 (24 months) vs RD-01 v2 Art.9 (12 months for coastal
+# sites). The newer, more specific clause wins; the conflict is surfaced.
+doc_id: RD-05
+doc_title: {en: Hydrogeological Survey Technical Standard}
+version: v1
+effective_from: "2021-01-01"
+effective_to: null
+status: current
+permit_types: [PT-2]
+languages_planned: [en]
+introduction:
+  en: >-
+    This Technical Standard sets the content and quality of hydrogeological surveys submitted
+    with groundwater well permit applications.
+clauses:
+  - clause_id: RD-05 Art.1
+    article: "1"
+    title: {en: Scope}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        This Standard sets the content and quality of hydrogeological surveys submitted with
+        groundwater well permit applications.
+  - clause_id: RD-05 Art.2
+    article: "2"
+    title: {en: Age of the survey}
+    permit_types: [PT-2]
+    params: {survey_max_age_months: 24}
+    text:
+      en: >-
+        A hydrogeological survey shall be no more than 24 months old on the application date.
+  - clause_id: RD-05 Art.3
+    article: "3"
+    title: {en: Qualified surveyor}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        The survey shall be carried out and signed by a hydrogeologist registered with the Authority.
+  - clause_id: RD-05 Art.4
+    article: "4"
+    title: {en: Survey content}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        The survey shall identify the target aquifer, the static water level and the water
+        quality at the proposed well location.
+  - clause_id: RD-05 Art.5
+    article: "5"
+    title: {en: Pumping test}
+    permit_types: [PT-2]
+    params: {pumping_test_above_m3_per_year: 20000, pumping_test_min_hours: 24}
+    text:
+      en: >-
+        Where the planned abstraction exceeds 20,000 m³ per year, the survey shall include a
+        pumping test lasting at least 24 hours.
+  - clause_id: RD-05 Art.6
+    article: "6"
+    title: {en: Survey date}
+    permit_types: [PT-2]
+    text:
+      en: >-
+        The survey report shall state the date of the fieldwork, and the age of the survey is
+        counted from that date.
