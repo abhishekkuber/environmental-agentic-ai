@@ -1,6 +1,6 @@
 # Project status: UC1 synthetic data
 
-*Last updated: 2026-11-27, after Stage 8. Updated at the end of every stage.*
+*Last updated: 2026-11-27, after Stage 9. Updated at the end of every stage.*
 
 ## 1. What this project is, in one paragraph
 
@@ -17,8 +17,8 @@ We are building a pretend environmental regulator ("the Authority") that receive
 | 5. Precedents | 60 short write-ups of past decisions the AI can look up, plus the answer key for precedent search | **Done** (committed) |
 | 6. Pack facts and answers | For each of the 105 application packs: the facts, and the correct verdict | **Done** (committed) |
 | 7. Rendering | Turns the facts into PDF documents, some made to look like bad scans | **Done** (committed) |
-| 8. Test sets | Question lists to test the AI (search questions, trick questions, attack attempts, step-by-step scenarios), plus the decision-pack and RFI-letter templates | **Done** (waiting for commit approval) |
-| 9. Final check and README | One command checks everything; README explains how to rebuild | Not started |
+| 8. Test sets | Question lists to test the AI (search questions, trick questions, attack attempts, step-by-step scenarios), plus the decision-pack and RFI-letter templates | **Done** (committed, `48fad46`) |
+| 9. Final check and README | One command checks everything; README explains how to rebuild; the data preparation document for assessors | **Done** (committed) |
 
 ## 3. Words used in this project
 
@@ -423,7 +423,7 @@ All 574 PDFs are byte-identical when re-rendered, even in a different folder. A 
 - **Sharpness score.** A standard measure of how blurry an image is (the variance of the Laplacian). Lower means blurrier.
 - **Render manifest.** The per-pack list of what was drawn, with page counts and file fingerprints.
 
-### Stage 8: Test sets and templates (done, waiting for commit approval)
+### Stage 8: Test sets and templates (committed, `48fad46`)
 
 **What was generated** (`make eval` and `make templates`, in `data/output/eval/` and `data/output/templates/examples/`):
 
@@ -483,6 +483,26 @@ Two builds are byte-identical (unit test). I deliberately broke a copy of the ou
 - **Near miss.** For an unanswerable question, a clause a weak AI might wrongly quote, recorded so mistakes can be analysed.
 - **Pasted content.** An attack that arrives because an officer pastes an applicant's email into the copilot, not through a PDF.
 
+### Stage 9: Final check, README and the data preparation document (committed)
+
+**One summary table.** `make check` now ends with `check_summary.py`. It counts everything straight from the generated files and compares each count with the spec target: **53 of 53 rows match**. The table is also saved as `data/output/summary.md`. Across all seven checkers, **341 checks pass**.
+
+**Rebuild from scratch.** On 2026-11-27 I cloned the repository into a fresh folder and ran `make all` (about 40 seconds). All 934 generated files came out **byte-identical** to the working copy. The only difference was one old leftover file (`render_assets/signature.png`), written by Stage 7 before its signature fix and no longer produced. I deleted it.
+
+**`data/README.md`.** The rebuild guide: seed, reference date, commands, what each output file holds, every seeded case listed by pack ID, what is reserved for the second language, and the known limitations.
+
+**`docs/UC1 Data Preparation.md`** is written for the assessors (submission deliverable 4). It covers:
+- the approach and its principles
+- each dataset and what it looks like
+- what each part of the data tests, mapped to the brief's acceptance scenarios A1–A8 and requirements
+- how the test sets were built
+- the assumptions behind the data
+- quality assurance
+- limitations, and how real data would change the results
+- the deferred second language
+
+It refers to brief sections by number and paraphrases them; it does not quote the brief.
+
 ## 5. Decisions made (and why)
 
 | Date | Decision | Why |
@@ -523,6 +543,7 @@ Two builds are byte-identical (unit test). I deliberately broke a copy of the ou
 | 2026-11-27 | On an incomplete pack, the scenarios forbid rule searches, buffer checks, history and precedent look-ups | Brief A2: "no rule assessment is run". The labels still hold findings for incomplete packs, for reference only |
 | 2026-11-27 | The worked examples are dated two days after the application | They need a fixed date, and the real clock is never used |
 | 2026-11-27 | The A6 officer review (edits, rejection reason, approval reason) is scripted in the scenario file | The brief gives the actions but not the words; my wording is a placeholder |
+| 2026-11-27 | A data preparation document for assessors, kept in `docs/`, citing brief sections by number without quoting | Your choice. STATUS.md stays the progress log; data/README.md stays the rebuild guide |
 
 ## 6. Open questions for you
 1. **Nationalities are real-world labels** (for example "Indian" or "British"), but every name comes from a US name list. The fairness test therefore mostly checks name bias, and only weakly. We could keep this, or use name lists from several countries.
@@ -561,7 +582,7 @@ make packs        # facts.json + correct-answer label for all 105 packs
 make render       # draw every pack's PDFs (about 25 seconds)
 make eval         # the test sets in data/output/eval/
 make templates    # decision-pack and RFI-letter examples (PDF + Word)
-make check        # all checks: eval 62/62, packs 36/36, precedents 24/24, registry 99/99, render 19/19, rules 48/48
+make check        # all checks (eval 62/62, packs 36/36, precedents 24/24, registry 99/99, render 19/19, rules 48/48), then the spec-vs-actual table (53/53)
 make test         # run the unit tests
 ```
 Run them in this order: `registry`, `rules`, `precedents`, `packs`, `render`, `eval`, `templates`. Each one reads the output of the one before.
