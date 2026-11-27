@@ -6,7 +6,7 @@ created: 2026-11-27
 
 # UC1 Data Preparation
 
-> Submission pack, deliverable 4 (synthetic data and pipelines) for Use Case 1, Intelligent Permit and NOC Processing. This document explains what data was prepared, how, which assumptions it rests on, what each part is designed to test, and where it falls short of real data. References in the form "brief §x" point to the assessment brief. References in the form A-nn point to the [[UC1 Assumption Log]].
+> Submission pack, deliverable 4 (synthetic data and pipelines) for Use Case 1, Intelligent Permit and NOC Processing. This document explains what data was prepared, how, which assumptions it rests on, what each part is designed to test, and where it falls short of real data. Section 11 maps where each file lives and what it holds. References in the form "brief §x" point to the assessment brief. References in the form A-nn point to the [[UC1 Assumption Log]].
 
 Related: [[UC1 Synthetic Data Specification]] (the detailed plan) · [[UC1 Assumption Log]] · [[UC1 Solution Architecture (Draft)]] · `data/README.md` (rebuild guide) · `docs/schema.sql`
 
@@ -361,3 +361,131 @@ make all    # registry → rules → precedents → packs → render → eval �
 ```
 
 Seed `20261125`, reference date 2026-11-20. Outputs go to `data/output/`. They are not stored in git, because they rebuild identically. `data/README.md` lists every seeded case by ID, and `STATUS.md` holds the build log, the decision history and the database guide.
+
+---
+
+## 11. Data map: where each piece of data lives
+
+Everything sits in the repository under `data/`, plus `config.yaml` at the root. Files under `data/output/` are **generated**: they are not stored in git and are rebuilt by `make all`. Everything else is source and is stored in git.
+
+### 11.1 Folder overview
+
+```text
+config.yaml                       settings: seed, dates, counts, limits, risk weights, attack texts
+docs/schema.sql                   SQL Server schema the registry CSVs load into
+data/
+  rules_src/                      hand-written rule YAML (one file per document version)
+  eval_src/                       hand-written questions, attacks and scenario intents (YAML)
+  generators/                     Python generators + render/templates/en/ (HTML templates)
+  checks/                         independent checkers (check_*.py)
+  loaders/load_sql_local.py       loads schema.sql + registry CSVs into local SQL Server
+  output/                         GENERATED (git-ignored)
+    registry/                     6 CSV tables
+    rules/                        docx/, pdf/, chunks.jsonl, config_seed.sql
+    precedents/precedents.jsonl   60 precedent summaries
+    packs/{pack_id}/              the pack's PDFs + facts.json + render_manifest.json
+    labels/{pack_id}.json         the correct answer for each pack
+    eval/                         test sets (JSONL / YAML)
+    templates/examples/           worked decision packs and RFI letter (PDF, DOCX, JSON)
+    seeds_manifest.json           index of every planted case and test item
+    summary.md                    spec target vs actual
+tests/                            unit tests (pytest)
+```
+
+### 11.2 Hand-written inputs (in git)
+
+| Path | Format | What it is |
+|---|---|---|
+| `config.yaml` | YAML | One place for every setting: seed and per-stage offsets, reference and cutover dates, bounding box, counts per table and pack group, rule limits (buffer, PM10, waste days, abstraction, survey age), clause references, risk factors and tiers, thresholds, name-matching rules, document names and page ranges, and the red-team attack texts |
+| `data/rules_src/RD-0x_vN.yaml` | YAML, 8 files | The rule text. Each clause has its ID, article, title, permit types, text per language, and any numeric parameters. Source for the rule Word and PDF files and `chunks.jsonl` |
+| `data/eval_src/retrieval_questions.yaml` | YAML | 75 question templates × 2 phrasings, with version-free clause IDs, a date period, and trap flags |
+| `data/eval_src/unanswerable.yaml` | YAML | 5 gap topics × 6 phrasings, with near-miss clause IDs |
+| `data/eval_src/trajectories.yaml` | YAML | 30 scenario intents: pack, flow type, actor, officer events (A6), failing tool (A8, V22) |
+| `data/eval_src/redteam.yaml` | YAML | 21 attack cases: channel, pack, guardrail, expected behaviour, pass criterion |
+| `data/eval_src/consistency.yaml` | YAML | The 20 packs for the consistency runs, with the reason each was chosen |
+| `data/generators/render/templates/en/*.html` | Jinja2 HTML | `document.html` + `sections.html` (the seven pack document types), `rule_document.html`, `decision_pack.html`, `rfi_letter.html`. A second language gets its own folder beside `en/` |
+| `docs/schema.sql` | SQL | Target tables and read-only views; the CSV column names match it exactly |
+
+### 11.3 Generated outputs (`data/output/`, rebuilt by `make all`)
+
+| Path | Format | Made by | What it is | Used later for |
+|---|---|---|---|---|
+| `registry/applicants.csv` | CSV, 300 rows | `make registry` | Applicants: name, type, nationality (fairness tests only), invented ID numbers, `example.test` email, phone, language | Azure SQL `registry` |
+| `registry/sites.csv` | CSV, 500 rows | `make registry` | Plot, address, district, land use, coordinates | Azure SQL; buffer checks |
+| `registry/protected_areas.csv` | CSV, 12 rows | `make registry` | Name, type, centre, radius | `buffer_check` stub |
+| `registry/licences.csv` | CSV, 540 rows | `make registry` | Trade licences and prior permits: number, holder name, issue and expiry dates, status | Licence validation (C3) |
+| `registry/prior_decisions.csv` | CSV, 150 rows | `make registry` | Outcome, date, reason text, clauses cited, precedent flag | Applicant history; precedent source |
+| `registry/open_cases.csv` | CSV, 40 rows | `make registry` | Enforcement, complaint, pending application, audit | Applicant history; risk tier |
+| `rules/docx/*.docx`, `rules/pdf/*.pdf` | Word, PDF (8 each) | `make rules` | The rule documents as an officer would read them; v1 of RD-01 carries a "Superseded" banner | SharePoint `Rules` library |
+| `rules/chunks.jsonl` | JSONL, 60 records | `make rules` | One record per clause version: text plus metadata (document, article, clause ID and reference, version, in-force dates, status, language, permit types, page, source path) | AI Search `rules-dev` index |
+| `rules/config_seed.sql` | SQL | `make rules` | Rows for the settings tables: checklist items, risk factors, risk tiers, thresholds | Rules engine and risk scoring |
+| `precedents/precedents.jsonl` | JSONL, 60 records | `make precedents` | Anonymised past-decision summaries with structured fields; marked "context, not rule" | AI Search `precedents-dev` index |
+| `packs/{pack_id}/*.pdf` | PDF | `make render` | The application documents as uploaded (section 11.4) | SharePoint; Document Intelligence |
+| `packs/{pack_id}/facts.json` | JSON | `make packs` | Everything printed in the pack: applicant, site, the fields of each document, how each is drawn (digital or scan, pages, planted text), and the portal payload | Source of the PDFs and the labels |
+| `packs/{pack_id}/render_manifest.json` | JSON | `make render` | What was drawn: per document the file, pages, digital or scan, annex pages, planted-text page, signature drawn, SHA-256 | Render checks; page counts |
+| `labels/{pack_id}.json` | JSON, 105 files | `make packs` | **The correct answer** (section 3.5) | Scoring classification, extraction, completeness, findings, tier, outcome |
+| `eval/retrieval.jsonl` | JSONL, 150 | `make eval` | Question, permit type, date, language, expected clause versions and chunk IDs, trap versions | Recall@5, precision@k, citation validity |
+| `eval/unanswerable.jsonl` | JSONL, 30 | `make eval` | Question, topic, date, expected "abstain", near-miss clauses | Abstention rate |
+| `eval/trajectories.yaml` | YAML, 30 | `make eval` | Expected supervisor steps, tool calls with counts, forbidden tools and citations, abstain and escalate points, end state | Trace review |
+| `eval/redteam.yaml` | YAML, 21 | `make eval` | Attack text, channel, location in the pack, guardrail, expected behaviour, pass criterion | Red-team results |
+| `eval/consistency.yaml` | YAML | `make eval` | 20 packs × 5 runs with the expected stable outputs | Consistency rate |
+| `eval/fairness_pairs.jsonl` | JSONL, 20 | `make eval` | Original and variant pack, what differs, the outcome both must share | Fairness report |
+| `eval/precedents_gold.jsonl` | JSONL, 20 | `make precedents` | Expected top-3 precedents per pack, and those that must not rank | Precedent relevance |
+| `eval/index.yaml` | YAML | `make eval` | Which file measures which requirement and target | Evaluation report |
+| `templates/examples/*` | PDF, DOCX, JSON | `make templates` | Filled decision packs (P1-002, P1-001) and RFI letter (P2-023); the JSON is the filled content | Template review; SharePoint `Templates` |
+| `seeds_manifest.json` | JSON | every stage | The pack plan (date, applicant, site, licence, group, seeds per pack), registry seeds, background records, seeded rules, precedent roles, evaluation items, reserved second-language items | Tracing any record back to its purpose |
+| `summary.md` | Markdown | `make check` | Spec target vs actual (53 rows) | Evidence for this document |
+
+### 11.4 Inside one pack
+
+A pack folder holds one PDF per **submitted** document. A document planted as missing is simply absent: there is no file for it, and the label marks it `missing`. The correct answer is kept outside the pack folder, in `labels/`, so a system under test can be pointed at `packs/` without seeing the answers.
+
+| Code | File in the pack folder | Permit type | What it contains | Pages |
+|---|---|---|---|---|
+| C1 | `application_form.pdf` | both | Applicant and type, permit type, trade licence number, site address and plot, coordinates, activity, declared quantities, submission date, signatory and signature box | 2–3 |
+| C2 | `site_plan.pdf` | both | Plot ID, district, coordinates, scale, drawing date, schematic drawing | 1–2 |
+| C3 | `trade_licence.pdf` | both | Licence number, holder name, activity, issue and expiry dates | 1 |
+| C4 | `ownership_evidence.pdf` | both | Document type (title deed or registered lease), owner, plot, date; owner's authorisation when a consultant applies | 1–2 |
+| P1-1 | `emissions_waste_summary.pdf` | PT-1 | Pollutants, PM10 t/yr, waste types and t/yr, storage days, liquid waste and containment description, control measures, proposed monitoring | 2–4 |
+| P2-1 | `well_design.pdf` | PT-2 | Well coordinates, depth, diameter, casing and grout depth, flow meter, driller registration, abstraction | 2–3 |
+| P2-2 | `hydrogeological_survey.pdf` | PT-2 | Fieldwork date, aquifer, static water level, water quality (TDS), pumping-test hours, surveyor, registration and signature | 3–6 |
+| | `facts.json` | | The structured facts the PDFs were drawn from | |
+| | `render_manifest.json` | | How each PDF was drawn, and its fingerprint | |
+
+Performance packs (PF-) add numbered annex pages to reach exactly 30 pages. Red-team packs carry their planted text on the page recorded in `facts.json` and `render_manifest.json`.
+
+### 11.5 Code that produces and checks the data
+
+| Make target | Generator | Checker | Test |
+|---|---|---|---|
+| `make registry` | `gen_registry.py` | `check_registry.py` | `test_registry.py` |
+| `make db-up`, `make db-load` | `loaders/load_sql_local.py` | built into the loader | n/a |
+| `make rules` | `gen_rules.py` | `check_rules.py` | `test_rules.py` |
+| `make precedents` | `gen_precedents.py` | `check_precedents.py` | `test_precedents.py` |
+| `make packs` | `gen_packs.py` + `labeller.py` (the rules engine) | `check_packs.py` | `test_packs.py` |
+| `make render` | `render_packs.py` | `check_render.py` | `test_render.py` |
+| `make eval` | `gen_eval.py` | `check_eval.py` | `test_eval.py` |
+| `make templates` | `render_templates.py` | `check_eval.py` (templates section) | `test_eval.py` |
+| `make check` | | all of the above, then `check_summary.py` | |
+
+Shared helpers (seed handling, distance maths, ID formats, file writers) are in `data/generators/common.py`.
+
+### 11.6 Quick lookup
+
+| To find… | Look in |
+|---|---|
+| The correct answer for a pack | `data/output/labels/{pack_id}.json` |
+| Why a pack exists and what was planted in it | `seeds_manifest.json` → `packs` (by `pack_id`), and `data/README.md` → Seeded cases |
+| What a pack's documents say, as data | `data/output/packs/{pack_id}/facts.json` |
+| What a pack looks like | the PDFs in `data/output/packs/{pack_id}/` |
+| The text of a clause | `data/rules_src/` (source), `data/output/rules/pdf/` (rendered), `chunks.jsonl` (with metadata) |
+| Which clause version applies on a date | `chunks.jsonl` → `effective_from` / `effective_to` (end date exclusive) |
+| A limit or threshold value | `config.yaml` → `rules`, `risk`, `thresholds` |
+| The document checklist per permit type | RD-07 Art.2, `config.yaml` → `permit_types`, `rules/config_seed.sql` |
+| An applicant's history | `registry/prior_decisions.csv` and `registry/open_cases.csv` by `applicant_id` |
+| How far a site is from a protected area | `labels/{pack_id}.json` → buffer finding evidence, or recompute from `sites.csv` and `protected_areas.csv` |
+| A planted attack's text and location | `config.yaml` → `pack_facts.injections`, and `eval/redteam.yaml` → `location` |
+| The search questions and their expected clauses | `eval/retrieval.jsonl` (source phrasings in `data/eval_src/`) |
+| What a scenario expects the agents to do | `eval/trajectories.yaml` |
+| Which items wait for the second language | `seeds_manifest.json` → `pending_secondary_language` and `eval.reserved_pending_secondary_language` |
+| Whether everything matches the plan | `data/output/summary.md`, or run `make check` |
