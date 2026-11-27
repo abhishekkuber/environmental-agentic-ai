@@ -7,3 +7,4 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 Frictional_UseCase_v1.0.pdf
+docs/interview-prep-microsoft-stack.md
