@@ -1,0 +1,29 @@
+# Consistency set (brief §3.2: same verdict in at least 95% of runs; A-22). Exercise content: fictional data.
+# 20 packs x 5 runs. gen_eval.py copies the expected values from each pack's label.
+runs: 5
+compare: [completeness_verdict, finding_verdicts, risk_tier, expected_outcome]
+ignore: [wording, ordering, timestamps]
+packs:
+  # complete
+  - {pack_id: P1-002, why: clean PT-1}
+  - {pack_id: P2-003, why: clean PT-2}
+  - {pack_id: P1-015, why: clean PT-1}
+  - {pack_id: P2-010, why: clean PT-2, before the cutover}
+  - {pack_id: P1-003, why: buffer not met after the cutover}
+  - {pack_id: P1-009, why: buffer met before the cutover}
+  - {pack_id: P1-005, why: PM10 above the limit}
+  - {pack_id: P2-013, why: abstraction above the limit}
+  - {pack_id: P1-010, why: activity not covered by any rule}
+  - {pack_id: P2-012, why: activity not covered by any rule}
+  - {pack_id: P1-001, why: prior refusal, unclear containment}
+  - {pack_id: P2-016, why: applicant history}
+  - {pack_id: P1-006, why: licence expiring within 90 days}
+  - {pack_id: P2-014, why: licence expiring within 90 days}
+  # seeded
+  - {pack_id: P1-026, why: missing signature}
+  - {pack_id: P2-023, why: A2 expired licence and missing survey}
+  - {pack_id: P1-027, why: unreadable scan}
+  - {pack_id: P2-026, why: mismatched well coordinates}
+  # extras
+  - {pack_id: P2-004, why: coastal survey conflict}
+  - {pack_id: RS-003, why: still-defective resubmission}

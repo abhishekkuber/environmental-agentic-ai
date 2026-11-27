@@ -8,7 +8,7 @@ ARGS    := $(if $(SEED),--seed $(SEED),)
 export DYLD_FALLBACK_LIBRARY_PATH := $(shell brew --prefix 2>/dev/null)/lib:$(DYLD_FALLBACK_LIBRARY_PATH)
 
 .DEFAULT_GOAL := help
-.PHONY: help venv registry rules precedents packs render eval check db-up db-load db-down test all clean
+.PHONY: help venv registry rules precedents packs render eval templates check db-up db-load db-down test all clean
 
 help:  ## List targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -32,8 +32,11 @@ packs:  ## Stage 6: pack facts + labels
 render:  ## Stage 7: render pack PDFs and scans
 	$(PY) $(GEN)/render_packs.py $(ARGS)
 
-eval:  ## Stage 8: evaluation sets
+eval:  ## Stage 8: evaluation sets (retrieval, unanswerable, trajectories, red team, consistency, fairness)
 	$(PY) $(GEN)/gen_eval.py $(ARGS)
+
+templates:  ## Stage 8: decision-pack and RFI-letter template examples (PDF, DOCX)
+	$(PY) $(GEN)/render_templates.py $(ARGS)
 
 check:  ## Run every data check that exists
 	@for c in $(CHK)/check_*.py; do echo "== $$c"; $(PY) $$c || exit 1; done
@@ -52,7 +55,7 @@ db-down:  ## Stop local SQL Server
 test:  ## Run pytest
 	$(PY) -m pytest -q
 
-all: registry rules precedents packs render eval check  ## Rebuild everything, then check
+all: registry rules precedents packs render eval templates check  ## Rebuild everything, then check
 
 clean:  ## Delete generated output
 	rm -rf data/output/*

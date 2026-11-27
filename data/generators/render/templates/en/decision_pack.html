@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>Decision pack (draft) {{ c.case_id }}</title>
+<meta name="description" content="{{ footer }}">
+<meta name="dcterms.created" content="{{ c.draft_date }}">
+<meta name="dcterms.modified" content="{{ c.draft_date }}">
+<meta name="generator" content="UC1 synthetic data">
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 18mm 24mm 18mm;
+    font-family: "Helvetica", "Arial", sans-serif;
+    @top-left { content: "Decision pack (draft): {{ c.case_id }}"; font-size: 8pt; color: #555; }
+    @top-right { content: "DRAFT"; font-size: 8pt; color: #b00020; font-weight: bold; }
+    @bottom-left { content: "{{ footer }}"; font-size: 8pt; color: #555; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #555; }
+  }
+  body { font-family: "Helvetica", "Arial", sans-serif; font-size: 9.5pt; line-height: 1.4; color: #111; }
+  .authority { font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #444; }
+  h1 { font-size: 16pt; margin: 2mm 0 1mm 0; }
+  h2 { font-size: 11pt; margin: 6mm 0 2mm 0; border-bottom: 1px solid #999; padding-bottom: 1mm; }
+  .banner { border: 1.5px solid #b00020; color: #b00020; padding: 2mm 3mm; margin: 3mm 0; font-weight: bold; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 3mm; }
+  td, th { border: 1px solid #bbb; padding: 1.3mm 2mm; text-align: left; vertical-align: top; }
+  th { background: #e8e8e8; }
+  table.kv td.k { width: 34%; background: #f2f2f2; }
+  .met { color: #1b5e20; font-weight: bold; }
+  .not_met { color: #b00020; font-weight: bold; }
+  .unclear { color: #8a5a00; font-weight: bold; }
+  .quote { font-style: italic; color: #333; }
+  .small { font-size: 8pt; color: #555; }
+  tr { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+  <div class="authority">The Authority (fictional environmental regulator) · {{ c.department_name }}</div>
+  <h1>Decision pack (draft)</h1>
+  <div class="banner">Draft for officer review. This is not a decision. Nothing has been issued to the applicant.</div>
+
+  <table class="kv">
+    <tr><td class="k">Case</td><td>{{ c.case_id }} (pack {{ c.pack_id }})</td></tr>
+    <tr><td class="k">Permit type</td><td>{{ c.permit_type }} {{ c.permit_name }}</td></tr>
+    <tr><td class="k">Applicant</td><td>{{ c.applicant_name }}</td></tr>
+    <tr><td class="k">Site</td><td>{{ c.site_address }} (plot {{ c.plot_id }}, {{ c.land_use }})</td></tr>
+    <tr><td class="k">Activity</td><td>{{ c.activity }}</td></tr>
+    <tr><td class="k">Application date</td><td>{{ c.application_date }} (rules in force on this date apply)</td></tr>
+    <tr><td class="k">Draft prepared</td><td>{{ c.draft_date }}</td></tr>
+  </table>
+
+  <h2>1. Summary</h2>
+  <p>{{ c.summary }}</p>
+
+  <h2>2. Findings</h2>
+  <table>
+    <tr><th style="width:17%">Requirement</th><th style="width:10%">Verdict</th><th style="width:13%">Clause</th><th>Quoted passage</th><th style="width:21%">Evidence</th></tr>
+    {% for f in c.findings %}
+    <tr>
+      <td>{{ f.requirement_label }}</td>
+      <td class="{{ f.verdict }}">{{ f.verdict_label }}</td>
+      <td>{{ f.clause or "None" }}</td>
+      <td><span class="quote">{{ f.quote }}</span><br><span class="small">{{ f.rationale }}</span></td>
+      <td>{{ f.evidence }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2>3. Proposed conditions</h2>
+  {% if c.conditions %}
+  <ol>{% for x in c.conditions %}<li>{{ x }}</li>{% endfor %}</ol>
+  {% else %}<p>None proposed.</p>{% endif %}
+
+  <h2>4. Recommendation</h2>
+  <p><strong>{{ c.recommendation_label }}.</strong> {{ c.recommendation_reason }}</p>
+
+  <h2>5. Open questions for the officer</h2>
+  {% if c.open_questions %}
+  <ul>{% for x in c.open_questions %}<li>{{ x }}</li>{% endfor %}</ul>
+  {% else %}<p>None.</p>{% endif %}
+
+  <h2>6. Risk tier and factors</h2>
+  <table class="kv">
+    <tr><td class="k">Risk tier</td><td>{{ c.risk_tier }} (score {{ c.risk_score }})</td></tr>
+    <tr><td class="k">Approver</td><td>{{ c.approver_label }}{% if c.reason_required %}; a written reason is required (BR-1.6){% endif %}</td></tr>
+  </table>
+  {% if c.risk_factors %}
+  <table>
+    <tr><th>Factor</th><th style="width:12%">Weight</th></tr>
+    {% for r in c.risk_factors %}<tr><td>{{ r.description }}</td><td>{{ r.weight }}</td></tr>{% endfor %}
+  </table>
+  {% else %}<p>No risk factors apply.</p>{% endif %}
+
+  {% if c.precedents %}
+  <h2>7. Similar past decisions (context only, not rules)</h2>
+  <table>
+    <tr><th style="width:14%">Precedent</th><th style="width:14%">Decided</th><th style="width:22%">Outcome</th><th>Activity</th></tr>
+    {% for p in c.precedents %}<tr><td>{{ p.id }}</td><td>{{ p.decision_date }}</td><td>{{ p.outcome }}</td><td>{{ p.activity }}</td></tr>{% endfor %}
+  </table>
+  {% endif %}
+</body>
+</html>

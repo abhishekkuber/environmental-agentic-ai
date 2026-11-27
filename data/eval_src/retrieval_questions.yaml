@@ -1,0 +1,546 @@
+# Retrieval questions (FR-1.7, FR-1.8, FR-1.9, brief A3). Exercise content: fictional data.
+# Hand-written; expanded by data/generators/gen_eval.py.
+#
+# Each template has exactly 2 phrasings -> 75 templates x 2 = 150 questions.
+#   scope    PT-1 | PT-2 | cross   (cross -> permit_type "any"; its clauses apply to both types)
+#   clauses  VERSION-FREE clause IDs. The version in force on the question's application date is
+#            looked up in chunks.jsonl, so expected answers can't drift from the rule corpus.
+#   when     any | before | after | mixed   (dates relative to the RD-01 cutover, 2026-07-01)
+#            any:    any date in the application range (RD-01 templates are treated as mixed)
+#            mixed:  phrasing 1 before the cutover, phrasing 2 after
+#   A phrasing written as {text, period: before|after} overrides the template's period.
+#   A phrasing written as {text, trap: true} is a SUPERSEDED-TRAP question: dated after the
+#   cutover but worded like the RD-01 v1 text, so the best keyword match is the old clause.
+#   The v1 clause goes in superseded_trap_ids. Exactly 25 traps.
+
+templates:
+  # =================================================================== PT-1 (30 templates, 10 traps)
+  - id: Q-P1-01
+    scope: PT-1
+    clauses: [RD-02 Art.3]
+    when: any
+    phrasings:
+      - What is the maximum annual PM10 emission a facility may declare in an Environmental NOC application?
+      - A cement grinding plant declares 14 tonnes of PM10 per year. Is that within the permitted limit?
+  - id: Q-P1-02
+    scope: PT-1
+    clauses: [RD-02 Art.5]
+    when: any
+    phrasings:
+      - When does an operator have to install continuous particulate monitoring?
+      - Which rule requires quarterly reporting of particulate monitoring results?
+  - id: Q-P1-03
+    scope: PT-1
+    clauses: [RD-02 Art.4]
+    when: any
+    phrasings:
+      - How high must a point-source stack discharge above nearby roofs?
+      - Does a stack that ends 2 m above the highest roof within 30 m comply with the emissions standard?
+  - id: Q-P1-04
+    scope: PT-1
+    clauses: [RD-02 Art.6]
+    when: any
+    phrasings:
+      - What must an operator do with open stockpiles of dusty material?
+      - Are uncovered sand stockpiles allowed at an aggregate yard when the plant is idle?
+  - id: Q-P1-05
+    scope: PT-1
+    clauses: [RD-02 Art.7]
+    when: any
+    phrasings:
+      - By what date must the annual emissions report be submitted?
+      - How often does an NOC holder have to report its emissions to the Authority?
+  - id: Q-P1-06
+    scope: PT-1
+    clauses: [RD-02 Art.1]
+    when: any
+    phrasings:
+      - Which facilities does the Air Emissions Technical Standard apply to?
+      - Does the air emissions standard cover a workshop that releases combustion gases?
+  - id: Q-P1-07
+    scope: PT-1
+    clauses: [RD-02 Art.2]
+    when: any
+    phrasings:
+      - How is PM10 defined in the emissions standard?
+      - In what unit are annual particulate quantities stated?
+  - id: Q-P1-08
+    scope: PT-1
+    clauses: [RD-03 Art.3]
+    when: any
+    phrasings:
+      - How long may industrial waste be stored on site before transfer?
+      - A plant plans to keep drummed waste on site for 75 days. Is that allowed?
+  - id: Q-P1-09
+    scope: PT-1
+    clauses: [RD-03 Art.5]
+    when: any
+    phrasings:
+      - What containment is required for liquid waste storage?
+      - Is a bunded area around the drum store enough secondary containment for liquid waste?
+  - id: Q-P1-10
+    scope: PT-1
+    clauses: [RD-03 Art.2]
+    when: any
+    phrasings:
+      - Does waste have to be classified before it is stored?
+      - Which categories must industrial waste be sorted into before storage?
+  - id: Q-P1-11
+    scope: PT-1
+    clauses: [RD-03 Art.4]
+    when: any
+    phrasings:
+      - What information must be on a waste container label?
+      - Can hazardous and non-hazardous waste be kept in the same storage bay?
+  - id: Q-P1-12
+    scope: PT-1
+    clauses: [RD-03 Art.6]
+    when: any
+    phrasings:
+      - How long must waste transfer records be kept?
+      - Does the operator need a record for every waste consignment that leaves the site?
+  - id: Q-P1-13
+    scope: PT-1
+    clauses: [RD-03 Art.1]
+    when: any
+    phrasings:
+      - What does the Waste Storage and Handling Guideline cover?
+      - Does the waste guideline apply to a facility that is only applying for an NOC?
+  - id: Q-P1-14
+    scope: PT-1
+    clauses: [RD-01 Art.3]
+    when: mixed
+    phrasings:
+      - Which activities need an Environmental NOC before they start?
+      - Does a facility that stores industrial waste but has no air emissions still need an NOC?
+  - id: Q-P1-15
+    scope: PT-1
+    clauses: [RD-01 Art.5]
+    when: mixed
+    phrasings:
+      - What emissions and waste information must an NOC application include?
+      - Which standards must the emissions and waste summary follow?
+  - id: Q-P1-16
+    scope: PT-1
+    clauses: [RD-01 Art.6]
+    when: after
+    phrasings:
+      - {text: 'Can a concrete batching plant be located 350 m from the boundary of a mangrove reserve, given the 300 m limit?', trap: true}
+      - {text: 'Is a metal workshop 420 m from a wetland boundary outside the 300 m buffer?', trap: true}
+  - id: Q-P1-17
+    scope: PT-1
+    clauses: [RD-01 Art.6]
+    when: after
+    phrasings:
+      - {text: 'No activity shall be located within 300 m of the boundary of a protected area. Does a site 310 m away comply?', trap: true}
+      - {text: 'An asphalt plant sits 460 m from a marine reserve. The rule says 300 m, so is it compliant?', trap: true}
+  - id: Q-P1-18
+    scope: PT-1
+    clauses: [RD-01 Art.6]
+    when: after
+    phrasings:
+      - {text: 'What is the 300 m protected-area buffer for industrial activities?', trap: true}
+      - {text: 'Is 300 m from a wildlife reserve far enough for a chemical blending unit?', trap: true}
+  - id: Q-P1-19
+    scope: PT-1
+    clauses: [RD-01 Art.4]
+    when: after
+    phrasings:
+      - {text: 'Is it enough for the applicant to hold a trade licence issued for the activity applied for?', trap: true}
+      - {text: 'The applicant holds a trade licence for the activity applied for, expiring in six weeks. Does that satisfy the trade licence article?', trap: true}
+  - id: Q-P1-20
+    scope: PT-1
+    clauses: [RD-01 Art.4]
+    when: after
+    phrasings:
+      - {text: 'Does the NOC regulation only require that the applicant holds a trade licence for the activity?', trap: true}
+      - {text: 'Must the trade licence simply be issued for the activity applied for, or is there a validity period?', trap: true}
+  - id: Q-P1-21
+    scope: PT-1
+    clauses: [RD-01 Art.6, RD-06 Art.2]
+    when: mixed
+    phrasings:
+      - How far must an industrial site be from a protected area, and how is the distance measured?
+      - Which buffer distance applies to a dust-emitting facility near a protected area?
+  - id: Q-P1-22
+    scope: PT-1
+    clauses: [RD-01 Art.4]
+    when: after
+    phrasings:
+      - How many days of remaining validity must a trade licence have on the application date?
+      - Is an NOC application acceptable if the trade licence expires 60 days after submission?
+  - id: Q-P1-23
+    scope: PT-1
+    clauses: [RD-01 Art.7, RD-02 Art.5]
+    when: mixed
+    phrasings:
+      - Can the Authority attach monitoring conditions when declared PM10 is close to the limit?
+      - What conditions can be added to an NOC when emissions are below but near the cap?
+  - id: Q-P1-24
+    scope: PT-1
+    clauses: [RD-07 Art.2]
+    when: any
+    phrasings:
+      - Which documents must an Environmental NOC application include to be complete?
+      - Is an NOC application complete without an emissions or waste summary?
+  - id: Q-P1-25
+    scope: PT-1
+    clauses: [RD-07 Art.5]
+    when: any
+    phrasings:
+      - Must the PM10 quantity on the application form match the emissions summary?
+      - The form declares 8 t/yr of PM10 but the emissions summary says 9 t/yr. Which rule does that break?
+  - id: Q-P1-26
+    scope: PT-1
+    clauses: [RD-02 Art.3, RD-02 Art.5]
+    when: any
+    phrasings:
+      - Above what PM10 level does a facility need continuous monitoring, and what is the cap?
+      - A plant declares 10.5 t/yr of PM10. Is it within the limit and does it need monitoring?
+  - id: Q-P1-27
+    scope: PT-1
+    clauses: [RD-03 Art.3, RD-03 Art.6]
+    when: any
+    phrasings:
+      - Where must stored waste go after the maximum storage period, and what records are kept?
+      - What are the storage time limit and the record-keeping rules for waste consignments?
+  - id: Q-P1-28
+    scope: PT-1
+    clauses: [RD-07 Art.3]
+    when: any
+    phrasings:
+      - The licence holder is "ACME TRADING L.L.C." and the applicant is "Acme Trading LLC". Is that a mismatch?
+      - What must the trade licence copy show for an NOC application?
+  - id: Q-P1-29
+    scope: PT-1
+    clauses: [RD-06 Art.4]
+    when: any
+    phrasings:
+      - When must the manager of a protected area be told about an NOC application?
+      - A ready-mix plant is 120 m outside the buffer. Does anyone need to be notified?
+  - id: Q-P1-30
+    scope: PT-1
+    clauses: [RD-01 Art.8]
+    when: mixed
+    phrasings:
+      - What is the longest validity an Environmental NOC can have?
+      - Can an NOC be issued for five years?
+
+  # =================================================================== PT-2 (30 templates, 10 traps)
+  - id: Q-P2-01
+    scope: PT-2
+    clauses: [RD-04 Art.3]
+    when: any
+    phrasings:
+      - What is the annual abstraction limit for a single well?
+      - A farm well plans to pump 62,000 m³ a year without an impact assessment. Is that allowed?
+  - id: Q-P2-02
+    scope: PT-2
+    clauses: [RD-04 Art.2]
+    when: any
+    phrasings:
+      - Do I need a permit to deepen an existing well?
+      - Which activities require a groundwater well permit?
+  - id: Q-P2-03
+    scope: PT-2
+    clauses: [RD-04 Art.4]
+    when: any
+    phrasings:
+      - How far must a new well be from another owner's permitted well?
+      - Can a new well be drilled 180 m from a neighbour's permitted well?
+  - id: Q-P2-04
+    scope: PT-2
+    clauses: [RD-04 Art.5]
+    when: any
+    phrasings:
+      - How deep must well casing be grouted?
+      - What must the well design state about depth, diameter and casing?
+  - id: Q-P2-05
+    scope: PT-2
+    clauses: [RD-04 Art.6]
+    when: any
+    phrasings:
+      - Does a permitted well need a flow meter?
+      - When must a calibrated flow meter be fitted to a well?
+  - id: Q-P2-06
+    scope: PT-2
+    clauses: [RD-04 Art.7]
+    when: any
+    phrasings:
+      - Who is allowed to drill a permitted well?
+      - Can the landowner's own crew drill the well if they are not a registered contractor?
+  - id: Q-P2-07
+    scope: PT-2
+    clauses: [RD-04 Art.8]
+    when: any
+    phrasings:
+      - How soon must an unused well be sealed?
+      - What happens to a well that has not been used for six months?
+  - id: Q-P2-08
+    scope: PT-2
+    clauses: [RD-04 Art.1]
+    when: any
+    phrasings:
+      - What does the Groundwater Well Drilling Regulation apply to?
+      - Does the well drilling regulation cover the use of a well as well as its construction?
+  - id: Q-P2-09
+    scope: PT-2
+    clauses: [RD-05 Art.2]
+    when: any
+    phrasings:
+      - How old can a hydrogeological survey be for an inland well application?
+      - An inland well application includes a 20-month-old survey. Is it recent enough?
+  - id: Q-P2-10
+    scope: PT-2
+    clauses: [RD-05 Art.3]
+    when: any
+    phrasings:
+      - Who must carry out and sign a hydrogeological survey?
+      - Is a survey signed by an unregistered geologist acceptable?
+  - id: Q-P2-11
+    scope: PT-2
+    clauses: [RD-05 Art.4]
+    when: any
+    phrasings:
+      - What must a hydrogeological survey identify at the proposed well location?
+      - Does the survey have to report the static water level?
+  - id: Q-P2-12
+    scope: PT-2
+    clauses: [RD-05 Art.5]
+    when: any
+    phrasings:
+      - When is a pumping test required in the survey?
+      - How long must the pumping test last for a well abstracting 30,000 m³ per year?
+  - id: Q-P2-13
+    scope: PT-2
+    clauses: [RD-05 Art.6]
+    when: any
+    phrasings:
+      - From which date is the age of a survey counted?
+      - Is survey age counted from the report date or the fieldwork date?
+  - id: Q-P2-14
+    scope: PT-2
+    clauses: [RD-05 Art.1]
+    when: any
+    phrasings:
+      - What does the Hydrogeological Survey Technical Standard set out?
+      - Which applications does the survey standard apply to?
+  - id: Q-P2-15
+    scope: PT-2
+    clauses: [RD-06 Art.5]
+    when: any
+    phrasings:
+      - Can a new well be drilled inside an aquifer protection zone?
+      - Are wells allowed within aquifer protection zones if the abstraction is small?
+  - id: Q-P2-16
+    scope: PT-2
+    clauses: [RD-01 Art.9, RD-05 Art.2]
+    when: after
+    phrasings:
+      - {text: 'A coastal well application includes an 18-month-old survey. It only has to meet the requirements of RD-05, so is it acceptable?', trap: true}
+      - {text: 'Does a hydrogeological survey for a coastal site simply need to meet RD-05?', trap: true}
+  - id: Q-P2-17
+    scope: PT-2
+    clauses: [RD-01 Art.9, RD-05 Art.2]
+    when: after
+    phrasings:
+      - {text: 'Is a 15-month-old hydrogeological survey submitted with a coastal well application within the RD-05 limit?', trap: true}
+      - {text: 'The survey submitted with the application shall meet the requirements of RD-05. What does that mean for a coastal well?', trap: true}
+  - id: Q-P2-18
+    scope: PT-2
+    clauses: [RD-01 Art.6]
+    when: after
+    phrasings:
+      - {text: 'Can an irrigation well be drilled 380 m from the boundary of a wetland under the 300 m rule?', trap: true}
+      - {text: 'A supply well is 450 m from a mangrove reserve. The buffer is 300 m, so is it compliant?', trap: true}
+  - id: Q-P2-19
+    scope: PT-2
+    clauses: [RD-01 Art.6]
+    when: after
+    phrasings:
+      - {text: 'Does the 300 m protected-area buffer apply to groundwater wells?', trap: true}
+      - {text: 'No activity shall be within 300 m of a protected area boundary. Is a well 330 m from a marine reserve compliant?', trap: true}
+  - id: Q-P2-20
+    scope: PT-2
+    clauses: [RD-01 Art.4]
+    when: after
+    phrasings:
+      - {text: 'For a well permit, is it enough that the applicant holds a trade licence issued for the activity applied for?', trap: true}
+      - {text: 'The farm holds a trade licence for the activity applied for, expiring next month. Is the licence requirement satisfied for its well permit?', trap: true}
+  - id: Q-P2-21
+    scope: PT-2
+    clauses: [RD-01 Art.9, RD-05 Art.2]
+    when: mixed
+    phrasings:
+      - What age limit applies to the hydrogeological survey for a well on a coastal site?
+      - Which survey age rule applies to a coastal well, and does it override the general rule?
+  - id: Q-P2-22
+    scope: PT-2
+    clauses: [RD-01 Art.6, RD-06 Art.2]
+    when: mixed
+    phrasings:
+      - How far must a new well be from a protected area, and how is it measured?
+      - Which buffer applies to a well near a wildlife reserve?
+  - id: Q-P2-23
+    scope: PT-2
+    clauses: [RD-01 Art.4]
+    when: after
+    phrasings:
+      - How long must the trade licence remain valid after a well permit application is submitted?
+      - Is a well application acceptable if the applicant's trade licence expires 45 days after submission?
+  - id: Q-P2-24
+    scope: PT-2
+    clauses: [RD-07 Art.2]
+    when: any
+    phrasings:
+      - Which documents must a groundwater well permit application include?
+      - Is a well permit application complete without the hydrogeological survey?
+  - id: Q-P2-25
+    scope: PT-2
+    clauses: [RD-07 Art.5]
+    when: any
+    phrasings:
+      - How closely must the well coordinates in the well design match the site plan?
+      - The well design coordinates are 200 m from those on the site plan. Is that acceptable?
+  - id: Q-P2-26
+    scope: PT-2
+    clauses: [RD-04 Art.3, RD-05 Art.5]
+    when: any
+    phrasings:
+      - What are the abstraction limit and the pumping test threshold for a well?
+      - A well will abstract 45,000 m³ a year. Is it under the cap, and is a pumping test required?
+  - id: Q-P2-27
+    scope: PT-2
+    clauses: [RD-06 Art.4]
+    when: any
+    phrasings:
+      - When must the protected-area manager be notified about a well application?
+      - A well site lies 90 m outside the applicable buffer. Is any notification needed?
+  - id: Q-P2-28
+    scope: PT-2
+    clauses: [RD-01 Art.2]
+    when: after
+    phrasings:
+      - How does the regulation define a coastal site for a well application?
+      - Is a well site counted as coastal based on its recorded land use?
+  - id: Q-P2-29
+    scope: PT-2
+    clauses: [RD-07 Art.7]
+    when: any
+    phrasings:
+      - What happens if pages of the hydrogeological survey cannot be read?
+      - Is an illegible scan of the well design treated as submitted?
+  - id: Q-P2-30
+    scope: PT-2
+    clauses: [RD-01 Art.1]
+    when: mixed
+    phrasings:
+      - Does the Environmental NOC Regulation apply to groundwater well permits?
+      - Which parts of the NOC regulation cover well permit applications?
+
+  # =================================================================== cross-cutting (15 templates, 5 traps)
+  - id: Q-X-01
+    scope: cross
+    clauses: [RD-01 Art.10]
+    when: after
+    phrasings:
+      - {text: 'Are applications submitted before 1 January 2023 assessed under the rules in force on their application date?', trap: true}
+      - {text: 'What do the transitional provisions say about applications submitted before 1 January 2023?', trap: true}
+  - id: Q-X-02
+    scope: cross
+    clauses: [RD-01 Art.2]
+    when: after
+    phrasings:
+      - {text: 'The regulation defines "protected area", "application date" and "buffer". What do these terms mean?', trap: true}
+      - {text: 'Which terms does the Environmental NOC Regulation define?', period: before}
+  - id: Q-X-03
+    scope: cross
+    clauses: [RD-01 Art.6]
+    when: after
+    phrasings:
+      - {text: 'Is the protected-area buffer 300 m for every activity under the regulation?', trap: true}
+      - {text: 'Does an application 300 m from a protected area meet the buffer rule?', trap: true}
+  - id: Q-X-04
+    scope: cross
+    clauses: [RD-06 Art.1]
+    when: any
+    phrasings:
+      - What kinds of area count as protected areas?
+      - Are aquifer protection zones protected areas?
+  - id: Q-X-05
+    scope: cross
+    clauses: [RD-06 Art.2]
+    when: any
+    phrasings:
+      - Is the distance to a protected area measured to its centre or its boundary?
+      - Which buffer distance should be used when measuring from a site to a protected area?
+  - id: Q-X-06
+    scope: cross
+    clauses: [RD-06 Art.3]
+    when: any
+    phrasings:
+      - How is the boundary of a protected area recorded as a circle defined?
+      - The register records a reserve as a centre and radius. Where is its boundary?
+  - id: Q-X-07
+    scope: cross
+    clauses: [RD-06 Art.4]
+    when: any
+    phrasings:
+      - Who is notified when a site lies just outside the buffer?
+      - What notification is required for sites less than 200 m outside the buffer?
+  - id: Q-X-08
+    scope: cross
+    clauses: [RD-07 Art.1]
+    when: any
+    phrasings:
+      - Which applications do the General Application Requirements cover?
+      - Do the general application requirements apply to both permit types?
+  - id: Q-X-09
+    scope: cross
+    clauses: [RD-07 Art.3]
+    when: any
+    phrasings:
+      - What must a trade licence copy show to be accepted?
+      - Is a trade licence that is not in the Authority's licence register acceptable?
+  - id: Q-X-10
+    scope: cross
+    clauses: [RD-07 Art.4]
+    when: any
+    phrasings:
+      - Who must sign the application form?
+      - Is an unsigned application form valid?
+  - id: Q-X-11
+    scope: cross
+    clauses: [RD-07 Art.6]
+    when: any
+    phrasings:
+      - What must the ownership evidence show?
+      - The applicant leases the plot from someone else. What extra document is needed?
+  - id: Q-X-12
+    scope: cross
+    clauses: [RD-07 Art.7]
+    when: any
+    phrasings:
+      - How are pages that cannot be read treated?
+      - What is the rule on document legibility?
+  - id: Q-X-13
+    scope: cross
+    clauses: [RD-07 Art.8]
+    when: any
+    phrasings:
+      - How long does an applicant have to respond to a request for information?
+      - What must a request for information list?
+  - id: Q-X-14
+    scope: cross
+    clauses: [RD-01 Art.8]
+    when: mixed
+    phrasings:
+      - What is the maximum validity of a permit issued under the regulation?
+      - For how long does an NOC or well permit stay valid?
+  - id: Q-X-15
+    scope: cross
+    clauses: [RD-07 Art.5]
+    when: any
+    phrasings:
+      - How far apart may site coordinates in different documents be?
+      - Must the quantities on the application form equal those in the technical documents?

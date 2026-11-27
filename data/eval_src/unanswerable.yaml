@@ -1,0 +1,58 @@
+# Unanswerable questions (FR-1.10, brief A5). Exercise content: fictional data.
+# No clause covers these topics (checked against the corpus by check_rules.py and check_eval.py).
+# Expected behaviour: abstain ("cannot determine: no clause covers this").
+# near_miss: version-free clause IDs a weak system might wrongly cite; gen_eval.py resolves them
+# to the version in force on each question's date.
+# 5 topics x 6 phrasings = 30.
+
+topics:
+  - topic: noise
+    permit_type: PT-1
+    near_miss: [RD-02 Art.6, RD-01 Art.7]
+    phrasings:
+      - What is the maximum noise level allowed at the boundary of a concrete batching plant?
+      - Does an NOC application need a noise impact assessment?
+      - How many decibels may a stone crusher produce at night?
+      - Are there quiet hours for an industrial site next to a residential area?
+      - Must an asphalt plant monitor its noise emissions every quarter?
+      - Which clause sets the acoustic limits for generators at an industrial facility?
+  - topic: desalination_brine
+    permit_type: any
+    near_miss: [RD-03 Art.5, RD-04 Art.3]
+    phrasings:
+      - How must brine from a small desalination unit be discharged?
+      - What salinity is allowed for reject water returned to the sea?
+      - Can a farm dispose of reverse-osmosis brine into an unused well?
+      - Is a permit needed to run a desalination plant that feeds a well field?
+      - What are the rules for storing concentrate from a desalination process?
+      - Does the Authority limit the volume of brine a facility may discharge each year?
+  - topic: data_centre_cooling_water
+    permit_type: PT-2
+    near_miss: [RD-04 Art.3, RD-05 Art.5]
+    phrasings:
+      - How much groundwater may a data centre abstract for its cooling towers?
+      - Can a server farm use well water for evaporative cooling?
+      - What temperature limit applies to cooling water returned to the ground by a data centre?
+      - Does a data-centre cooling system need a separate abstraction permit?
+      - Are there water-efficiency targets for data centres that use groundwater?
+      - Which clause governs blowdown water from data-centre cooling towers?
+  - topic: temporary_activity
+    permit_type: any
+    near_miss: [RD-01 Art.8, RD-01 Art.3]
+    phrasings:
+      - Does a mobile crusher used on site for three weeks need an NOC?
+      - Is there a simplified permit for activities that last less than 30 days?
+      - Can a temporary asphalt plant for a road project skip the buffer rule?
+      - How long can a short-term construction activity run before it needs a permit?
+      - Are pop-up events with generators exempt from the NOC regulation?
+      - Is there a fast-track process for activities that will end within a month?
+  - topic: solar_farm
+    permit_type: PT-1
+    near_miss: [RD-01 Art.3, RD-06 Art.2]
+    phrasings:
+      - Does a solar farm need an Environmental NOC?
+      - What buffer applies to photovoltaic panels near a wildlife reserve?
+      - Are there rules on panel-cleaning water at a solar park?
+      - How should a solar plant dispose of broken photovoltaic modules?
+      - Is a rooftop solar installation at a factory covered by the emissions standard?
+      - What land-use conditions apply to a utility-scale solar project?

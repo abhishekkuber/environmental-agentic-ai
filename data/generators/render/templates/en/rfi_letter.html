@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>Request for information (draft) {{ c.case_id }}</title>
+<meta name="description" content="{{ footer }}">
+<meta name="dcterms.created" content="{{ c.letter_date }}">
+<meta name="dcterms.modified" content="{{ c.letter_date }}">
+<meta name="generator" content="UC1 synthetic data">
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 20mm 24mm 20mm;
+    font-family: "Helvetica", "Arial", sans-serif;
+    @top-left { content: "Request for information (draft): {{ c.case_id }}"; font-size: 8pt; color: #555; }
+    @top-right { content: "DRAFT"; font-size: 8pt; color: #b00020; font-weight: bold; }
+    @bottom-left { content: "{{ footer }}"; font-size: 8pt; color: #555; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #555; }
+  }
+  body { font-family: "Helvetica", "Arial", sans-serif; font-size: 10.5pt; line-height: 1.5; color: #111; }
+  .authority { font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #444; margin-bottom: 6mm; }
+  .banner { border: 1.5px solid #b00020; color: #b00020; padding: 2mm 3mm; margin-bottom: 6mm; font-weight: bold; font-size: 9pt; }
+  .addr { margin-bottom: 6mm; }
+  table { border-collapse: collapse; width: 100%; margin: 3mm 0 5mm 0; }
+  td, th { border: 1px solid #bbb; padding: 1.5mm 2mm; text-align: left; vertical-align: top; }
+  th { background: #e8e8e8; }
+  .deadline { border: 1px solid #333; padding: 2mm 3mm; margin: 4mm 0; }
+  .quote { font-style: italic; color: #333; }
+  .sign { margin-top: 12mm; }
+</style>
+</head>
+<body>
+  <div class="authority">The Authority (fictional environmental regulator) · {{ c.department_name }}</div>
+  <div class="banner">Draft: requires officer approval before it is sent.</div>
+
+  <div class="addr">
+    {{ c.applicant_name }}<br>
+    {{ c.site_address }}<br>
+    {{ c.contact_email }}
+  </div>
+  <p>Date: {{ c.letter_date }}<br>
+     Our reference: {{ c.case_id }}<br>
+     Application: {{ c.permit_type }} {{ c.permit_name }}, submitted {{ c.application_date }}</p>
+
+  <p><strong>Request for information</strong></p>
+  <p>Dear {{ c.applicant_name }},</p>
+  <p>Thank you for your application. We have checked the documents you submitted against the required
+     documents for this permit type. The application is incomplete, so we cannot assess it yet.
+     Please provide the following:</p>
+
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:24%">Document</th><th style="width:36%">What we found</th><th>What we need from you</th></tr>
+    {% for it in c.rfi_items %}
+    <tr><td>{{ loop.index }}</td><td>{{ it.document }} ({{ it.code }})</td><td>{{ it.found }}</td><td>{{ it.needed }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <div class="deadline">Please respond by <strong>{{ c.deadline }}</strong> ({{ c.response_days }} days from the date of this letter).</div>
+  <p>This request is made under {{ c.rfi_clause }}: <span class="quote">"{{ c.rfi_quote }}"</span></p>
+  <p>When we receive the documents, we will continue with the assessment of your application. If you have
+     questions, reply to this letter quoting reference {{ c.case_id }}.</p>
+
+  <div class="sign">
+    Yours sincerely,<br><br>
+    [Name of approving officer]<br>
+    {{ c.department_name }}, the Authority
+  </div>
+</body>
+</html>
