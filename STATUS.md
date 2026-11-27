@@ -74,7 +74,7 @@ We are building a pretend environmental regulator ("the Authority") that receive
 | R-01 … R-21 | Red-team (attack) test cases. R-01 to R-05 and R-10 use planted packs; the rest were drafted by me (the security pack isn't available) |
 | V01 … V22 | Trajectory variants: extra step-by-step scenarios built on A1–A8 |
 | RQ- / UQ- / FP- | Search question / unanswerable question / fairness pair IDs in the test sets |
-| A-01 … A-31 | Assumptions in `docs/UC1 Assumption Log.md` |
+| A-01 … A-35 | Assumptions in `docs/UC1 Assumption Log.md` |
 | FR-x.y / BR-x.y / NFR | Functional / Business / Non-Functional Requirement numbers from the brief |
 
 **Registry record IDs (all invented formats)**
@@ -544,6 +544,7 @@ It refers to brief sections by number and paraphrases them; it does not quote th
 | 2026-11-27 | The worked examples are dated two days after the application | They need a fixed date, and the real clock is never used |
 | 2026-11-27 | The A6 officer review (edits, rejection reason, approval reason) is scripted in the scenario file | The brief gives the actions but not the words; my wording is a placeholder |
 | 2026-11-27 | A data preparation document for assessors, kept in `docs/`, citing brief sections by number without quoting | Your choice. STATUS.md stays the progress log; data/README.md stays the rebuild guide |
+| 2026-11-27 | Four design decisions moved into the assumption log as A-32 to A-35: refusal count 85/35/30, survey age is a rule finding, no rule assessment on incomplete packs, step budget counts supervisor stages | Your choice. All assumptions now live in one place, and the data preparation document cites them by ID |
 
 ## 6. Open questions for you
 1. **Nationalities are real-world labels** (for example "Indian" or "British"), but every name comes from a US name list. The fairness test therefore mostly checks name bias, and only weakly. We could keep this, or use name lists from several countries.

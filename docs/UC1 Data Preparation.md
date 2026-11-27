@@ -278,13 +278,12 @@ The full log is in [[UC1 Assumption Log]]. These are the assumptions that shape 
 | A-29 | Packs with planted instructions are not approved and are routed to an officer | 6 packs labelled `injection_suspected` |
 | A-30 | Red-team cases R-06 to R-21 drafted by the candidate | Marked `source: draft` |
 | A-31 | Second-RFI rate cannot be shown with fixed resubmissions | Stated limitation |
+| A-32 | The plan's 15% refusal share conflicts with its minimum of 30 refusals; the minimum wins | Prior decisions split 85 / 35 / 30 |
+| A-33 | A submitted survey is present; its age is a rule finding, not a completeness defect | P2-004 fails a rule (coastal conflict) instead of becoming an RFI case |
+| A-34 | Findings are computed for incomplete packs for reference only; the agent runs no rule assessment on them (brief A2) | Incomplete-pack trajectories forbid rule searches, buffer checks and look-ups |
+| A-35 | The 12-step budget counts supervisor stages, not tool calls; at most 2 retries per tool | Trajectories list supervisor steps and tool calls separately |
 
-**Design decisions not covered by the log:**
-- **Refusal count.** Prior decisions are split 85 / 35 / 30. The plan's 15% refusal share (22.5) conflicted with its own minimum of 30 refusals, and the minimum won.
-- **Survey age.** It is assessed as a rule finding, not a completeness item. Otherwise an old survey would make a pack "incomplete" instead of failing a rule.
-- **Findings on incomplete packs.** They are computed in the labels for reference only. Brief A2 means the agent should run no rule assessment on an incomplete pack, and the trajectories enforce that.
-- **Step budget.** The 12-step budget counts supervisor steps, not tool calls. A PT-2 pack alone needs up to 12 tool calls for reading and searching.
-- **Draft dates.** Worked examples are dated two days after the application, so no clock is involved.
+The template worked examples are dated two days after the application date, so the build never reads the clock.
 
 ---
 
