@@ -6,7 +6,8 @@ An assessment project: a multi-agent **Permit and NOC Processing** solution on M
 **Current task: generate all synthetic data for Use Case 1, locally, with Faker.** No Azure or Microsoft 365 accounts are used at this stage. Nothing is uploaded anywhere.
 
 ## Source documents (read these first)
-- `docs/UC1 Synthetic Data Specification.md`: **the source of truth** for every count, seeded case and label. If this file and the spec disagree, the spec wins; flag the conflict to me.
+- `Frictional_UseCase_v1.0.pdf` (repo root): **the assessment brief, the highest authority** (UC1 = §3, acceptance scenarios A1–A8 = §3.13, synthetic data = Appendix A.1). It is **confidential and git-ignored**: never commit, copy into `docs/`, upload or quote it outside this repo. If the spec or this file disagrees with the brief, the brief wins; flag the conflict to me.
+- `docs/UC1 Synthetic Data Specification.md`: **the detailed plan** for every count, seeded case and label. If this file and the spec disagree, the spec wins; flag the conflict to me.
 - `docs/schema.sql`: Azure SQL / SQL Server 2022 schema. Registry CSVs must load into it unchanged.
 - `docs/UC1 Assumption Log.md`: assumptions (languages, departments, thresholds, definitions).
 - `docs/UC1 Solution Architecture (Draft).md`: section 4 has the permit checklists and validation rules the packs must satisfy or break.
@@ -146,6 +147,7 @@ Write to `data/output/eval/`:
 - `trajectories.yaml`: 30 scenarios: A1–A8 + 22 variants, with expected tool order, max steps, abstain/escalate points
 - `redteam.yaml`: R-01 … R-21 from the security pack (R-03, the secondary-language injection, is a placeholder flagged `pending_secondary_language`)
 - `consistency.yaml`: 20 pack IDs × 5 runs; `fairness_pairs.jsonl`: 20 pairs
+- Templates (brief Appendix A.1): decision-pack and RFI-letter templates, English now, secondary language reserved
 - **Checks:** sizes; every `relevant_clause_id` exists in `chunks.jsonl`; superseded traps point to v1 clauses.
 
 ### Stage 9: Final validation + README
